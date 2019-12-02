@@ -1,60 +1,16 @@
 use std::io;
 //use std::vec;
 
-fn main()
+fn run(prog: &mut Vec<i32>) -> i32
 {
-    println!("Enter the program.");
-	
-	let stdin = io::stdin();
-	//let mut vec = vec::Vec::new();
-	
-	let mut prog = String::new();
-	
-	stdin.read_line(&mut prog)
-		.expect("Please enter something");
-	
-	//let prog = prog.trim().split(' ').map(|x| match x.parse() { Ok(n) => n, Err(_) => 0 }).collect::<Vec<i32>>();
-	let mut prog = prog.trim().split(',')
-		.map(|x| x.parse().expect("Not a number"))
-		.collect::<Vec<i32>>();
-	//let prog = prog.split(' ');//.collect::<Vec<i32>>();
-
-
-	//loop
-	//{
-	//	let num: i32 = match num.trim().parse()
-	//	{
-	//		Ok(n) => n,
-	//		Err(_) => break,
-	//	};
-	//	
-	//		//.expect("Bye");
-	//	
-	//	vec.push(num);
-	//	
-	//	//let calc: i32 = num / 3 - 2;
-	//	//println!("Number: {}, {}", num, calc);
-	//}
-	//
-	//let vec = vec.iter().map(fuel);
-
-//	prog.iter().for_each(|&x| { println!("{}", &x); x = 7; });
-//	prog.iter().map(|&x| 7).for_each(|x| println!("{}", x));
-	//prog.for_each(|x| println!("{}", x));
-	//let total: i32 = vec.fold(0, |cur, x| cur + x);
-	//
-	//
-	//println!("{}", total);
-	
-	
-	let mut i = 0;
 	let len = prog.len();
-	
+	let mut i = 0;
+
 	loop
 	{
 		if i >= len
 		{
-			return;
+			break;
 		}
 		
 		match prog[i]
@@ -84,7 +40,60 @@ fn main()
 			}
 		}
 	}
+	prog[0]
+}
+
+fn main()
+{
+    println!("Enter the program.");
 	
-	prog.iter().for_each(|x| println!("{}", &x) );
+	let stdin = io::stdin();
+	//let mut vec = vec::Vec::new();
+	
+	let mut input = String::new();
+	
+	stdin.read_line(&mut input)
+		.expect("Please enter something");
+	
+	let original = input.trim().split(',')
+		.map(|x| x.parse().expect("Not a number"))
+		.collect::<Vec<i32>>();
+	
+	let mut noun = 0;
+	loop
+	{
+		let mut verb = 0;
+		loop
+		{
+			let mut prog = original.clone();
+			
+			prog[1] = noun;
+			prog[2] = verb;
+			
+			let result = run(&mut prog);
+			
+			if result == 19690720
+			{
+				println!("Found the result: {}", 100 * noun + verb);
+			}
+			
+			verb += 1;
+			if verb == 100
+			{
+				break;
+			}
+		}
+		
+		noun += 1;
+		if noun == 100
+		{
+			break;
+		}
+	}
+	
+	
+	
+	
+	//prog.iter().for_each(|x| println!("{}", &x) );
 }
 
