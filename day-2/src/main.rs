@@ -45,7 +45,7 @@ fn run(prog: &mut Vec<i32>) -> i32
 
 fn main()
 {
-    println!("Enter the program.");
+	println!("Enter the program.");
 	
 	let stdin = io::stdin();
 	//let mut vec = vec::Vec::new();
