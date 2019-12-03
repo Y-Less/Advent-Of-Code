@@ -74,11 +74,13 @@ fn insert_all(cells: &mut HashMap<Cell, i32>, a: Cell, b: Cell, ai: &mut i32) ->
 	}
 	if a.1 > b.1
 	{
+		*ai = *ai + a.1 - b.1 + 1;
 		for y in b.1 .. a.1
 		{
-			*ai = *ai + 1;
+			*ai = *ai - 1;
 			maybe_insert(cells, (a.0, y), *ai, 0);
 		}
+		*ai = *ai + a.1 - b.1 - 1;
 	}
 	if a.0 < b.0
 	{
@@ -90,11 +92,13 @@ fn insert_all(cells: &mut HashMap<Cell, i32>, a: Cell, b: Cell, ai: &mut i32) ->
 	}
 	if a.0 > b.0
 	{
+		*ai = *ai + a.0 - b.0 + 1;
 		for x in b.0 .. a.0
 		{
-			*ai = *ai + 1;
+			*ai = *ai - 1;
 			maybe_insert(cells, (x, a.1), *ai, 0);
 		}
+		*ai = *ai + a.0 - b.0 - 1;
 	}
 	b
 }
@@ -116,9 +120,10 @@ fn check_all(cells: &HashMap<Cell, i32>, intersects: &mut HashMap<Cell, i32>, a:
 	}
 	if a.1 > b.1
 	{
+		*bi = *bi + a.1 - b.1 + 1;
 		for y in b.1 .. a.1
 		{
-			*bi = *bi + 1;
+			*bi = *bi - 1;
 			let key = (a.0, y);
 			match cells.get(&key)
 			{
@@ -126,6 +131,7 @@ fn check_all(cells: &HashMap<Cell, i32>, intersects: &mut HashMap<Cell, i32>, a:
 				None => {}
 			}
 		}
+		*bi = *bi + a.1 - b.1 - 1;
 	}
 	if a.0 < b.0
 	{
@@ -142,9 +148,10 @@ fn check_all(cells: &HashMap<Cell, i32>, intersects: &mut HashMap<Cell, i32>, a:
 	}
 	if a.0 > b.0
 	{
+		*bi = *bi + a.0 - b.0 + 1;
 		for x in b.0 .. a.0
 		{
-			*bi = *bi + 1;
+			*bi = *bi - 1;
 			let key = (x, a.1);
 			match cells.get(&key)
 			{
@@ -152,6 +159,7 @@ fn check_all(cells: &HashMap<Cell, i32>, intersects: &mut HashMap<Cell, i32>, a:
 				None => {}
 			}
 		}
+		*bi = *bi + a.0 - b.0 - 1;
 	}
 	b
 }
@@ -196,30 +204,30 @@ fn main()
 		Direction::R { n } => pos = insert_all(&mut cells, pos, (pos.0 + n, pos.1), &mut ai),
 		}
 	});
-	cells.iter().for_each(print_position);
+	//cells.iter().for_each(print_position);
 	
-	//let mut i1 = String::new();
-    //
-	//stdin.read_line(&mut i1)
-	//	.expect("Please enter the second wire");
-    //
-	//let wire2 = i1.trim().split(',');
-	//pos = (0, 0);
-    //
-	//let mut intersects: HashMap<Cell> = HashMap::new();
-	//let mut bi = 0;
-    //
-	//wire2.for_each(|x|
-	//{
-	//	match get_direction(x)
-	//	{
-	//	Direction::D { n } => pos = check_all(&cells, &mut intersects, pos, (pos.0, pos.1 - n), &mut bi),
-	//	Direction::U { n } => pos = check_all(&cells, &mut intersects, pos, (pos.0, pos.1 + n), &mut bi),
-	//	Direction::L { n } => pos = check_all(&cells, &mut intersects, pos, (pos.0 - n, pos.1), &mut bi),
-	//	Direction::R { n } => pos = check_all(&cells, &mut intersects, pos, (pos.0 + n, pos.1), &mut bi),
-	//	}
-	//});
-	//intersects.remove(&(0, 0));
-	//println!("Minimum: {:?}", intersects.iter().map(distance).min());
+	let mut i1 = String::new();
+    
+	stdin.read_line(&mut i1)
+		.expect("Please enter the second wire");
+    
+	let wire2 = i1.trim().split(',');
+	pos = (0, 0);
+    
+	let mut intersects: HashMap<Cell, i32> = HashMap::new();
+	let mut bi = 0;
+    
+	wire2.for_each(|x|
+	{
+		match get_direction(x)
+		{
+		Direction::D { n } => pos = check_all(&cells, &mut intersects, pos, (pos.0, pos.1 - n), &mut bi),
+		Direction::U { n } => pos = check_all(&cells, &mut intersects, pos, (pos.0, pos.1 + n), &mut bi),
+		Direction::L { n } => pos = check_all(&cells, &mut intersects, pos, (pos.0 - n, pos.1), &mut bi),
+		Direction::R { n } => pos = check_all(&cells, &mut intersects, pos, (pos.0 + n, pos.1), &mut bi),
+		}
+	});
+	intersects.remove(&(0, 0));
+	println!("Minimum: {:?}", intersects.iter().map(|x| x.1).min());
 }
 
