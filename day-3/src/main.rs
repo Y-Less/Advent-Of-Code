@@ -44,6 +44,45 @@ fn get_direction(i: &str) -> Direction //Result<Direction, &'static str>
 	}
 }
 
+fn insert_all(cells: &mut HashSet<Cell>, a: Cell, b: Cell) -> Cell
+{
+	if a.0 == b.0
+	{
+		if a.1 < b.1
+		{
+			for y in a.1 .. b.1
+			{
+				cells.insert((a.0, y + 1));
+			}
+		}
+		if a.1 > b.1
+		{
+			for y in b.1 .. a.1
+			{
+				cells.insert((a.0, y));
+			}
+		}
+	}
+	if a.1 == b.1
+	{
+		if a.0 < b.0
+		{
+			for x in a.0 .. b.0
+			{
+				cells.insert((x + 1, a.1));
+			}
+		}
+		if a.0 > b.0
+		{
+			for x in b.0 .. a.0
+			{
+				cells.insert((x, a.1));
+			}
+		}
+	}
+	b
+}
+
 fn main()
 {
 	println!("Enter the two paths.");
@@ -66,12 +105,11 @@ fn main()
 	{
 		match get_direction(x)
 		{
-		Direction::U { n } => pos = (pos.0, pos.1 + n),
-		Direction::D { n } => pos = (pos.0, pos.1 - n),
-		Direction::L { n } => pos = (pos.0 + n, pos.1),
-		Direction::R { n } => pos = (pos.0 - n, pos.1),
+		Direction::U { n } => pos = insert_all(&mut cells, pos, (pos.0, pos.1 + n)),
+		Direction::D { n } => pos = insert_all(&mut cells, pos, (pos.0, pos.1 - n)),
+		Direction::L { n } => pos = insert_all(&mut cells, pos, (pos.0 + n, pos.1)),
+		Direction::R { n } => pos = insert_all(&mut cells, pos, (pos.0 - n, pos.1)),
 		}
-		cells.insert(pos);
 	});
 	cells.iter().for_each(print_position);
 	
