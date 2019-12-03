@@ -10,6 +10,8 @@ enum Direction
 	R { n: i32 },
 }
 
+type Cell = (i32, i32);
+
 fn print_direction(i: &Direction) -> ()
 {
 	match i
@@ -19,6 +21,11 @@ fn print_direction(i: &Direction) -> ()
 	Direction::L { n } => println!("L {{ {} }}", n),
 	Direction::R { n } => println!("R {{ {} }}", n),
 	}
+}
+
+fn print_position(i: &Cell) -> ()
+{
+	println!("( {} {} )", i.0, i.1);
 }
 
 fn get_direction(i: &str) -> Direction //Result<Direction, &'static str>
@@ -50,14 +57,23 @@ fn main()
 	
 	let wire1 = input.trim().split(',');
 
-	let mut cells: HashSet<Direction> = HashSet::new();
-
+	let mut cells: HashSet<Cell> = HashSet::new();
 	
+	let mut pos: Cell = (0, 0);
+	cells.insert(pos);
+
 	wire1.for_each(|x|
 	{
-		cells.insert(get_direction(x));
+		match get_direction(x)
+		{
+		Direction::U { n } => pos = (pos.0, pos.1 + n),
+		Direction::D { n } => pos = (pos.0, pos.1 - n),
+		Direction::L { n } => pos = (pos.0 + n, pos.1),
+		Direction::R { n } => pos = (pos.0 - n, pos.1),
+		}
+		cells.insert(pos);
 	});
-	cells.iter().for_each(print_direction);
+	cells.iter().for_each(print_position);
 	
 	
 	//wire1.for_each(|x| match x[0]
@@ -65,10 +81,5 @@ fn main()
 	//	'U;
 	//
 	//})
-
-
-
-
-
-
 }
+
