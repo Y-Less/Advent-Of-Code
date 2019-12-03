@@ -1,5 +1,5 @@
 use std::io;
-use std::collections::HashSet;
+use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Ord, PartialOrd, Hash)]
 enum Direction
@@ -23,9 +23,9 @@ fn print_direction(i: &Direction) -> ()
 	}
 }
 
-fn print_position(i: &Cell) -> ()
+fn print_position(i: (&Cell, &i32)) -> ()
 {
-	println!("( {} {} )", i.0, i.1);
+	println!("({}, {}) = {}", (i.0).0, (i.0).1, i.1);
 }
 
 fn get_direction(i: &str) -> Direction //Result<Direction, &'static str>
@@ -44,48 +44,73 @@ fn get_direction(i: &str) -> Direction //Result<Direction, &'static str>
 	}
 }
 
-fn insert_all(cells: &mut HashSet<Cell>, a: Cell, b: Cell) -> Cell
+fn maybe_insert(map: &mut HashMap<Cell, i32>, key: Cell, ai: i32, bi: i32)
+{
+	match map.get(&key)
+	{
+        Some(distance) =>
+		{
+			if ai + bi < *distance
+			{
+				map.insert(key, ai + bi);
+			}
+		}
+        None =>
+		{
+			map.insert(key, ai + bi);
+		}
+    }
+}
+
+fn insert_all(cells: &mut HashMap<Cell, i32>, a: Cell, b: Cell, ai: &mut i32) -> Cell
 {
 	if a.1 < b.1
 	{
 		for y in a.1 .. b.1
 		{
-			cells.insert((a.0, y + 1));
+			*ai = *ai + 1;
+			maybe_insert(cells, (a.0, y + 1), *ai, 0);
 		}
 	}
 	if a.1 > b.1
 	{
 		for y in b.1 .. a.1
 		{
-			cells.insert((a.0, y));
+			*ai = *ai + 1;
+			maybe_insert(cells, (a.0, y), *ai, 0);
 		}
 	}
 	if a.0 < b.0
 	{
 		for x in a.0 .. b.0
 		{
-			cells.insert((x + 1, a.1));
+			*ai = *ai + 1;
+			maybe_insert(cells, (x + 1, a.1), *ai, 0);
 		}
 	}
 	if a.0 > b.0
 	{
 		for x in b.0 .. a.0
 		{
-			cells.insert((x, a.1));
+			*ai = *ai + 1;
+			maybe_insert(cells, (x, a.1), *ai, 0);
 		}
 	}
 	b
 }
 
-fn check_all(cells: &HashSet<Cell>, intersects: &mut HashSet<Cell>, a: Cell, b: Cell) -> Cell
+fn check_all(cells: &HashMap<Cell, i32>, intersects: &mut HashMap<Cell, i32>, a: Cell, b: Cell, bi: &mut i32) -> Cell
 {
 	if a.1 < b.1
 	{
 		for y in a.1 .. b.1
 		{
-			if cells.contains(&(a.0, y + 1))
+			*bi = *bi + 1;
+			let key = (a.0, y + 1);
+			match cells.get(&key)
 			{
-				intersects.insert((a.0, y + 1));
+				Some(ai) => maybe_insert(intersects, key, *ai, *bi),
+				None => {}
 			}
 		}
 	}
@@ -93,9 +118,12 @@ fn check_all(cells: &HashSet<Cell>, intersects: &mut HashSet<Cell>, a: Cell, b: 
 	{
 		for y in b.1 .. a.1
 		{
-			if cells.contains(&(a.0, y))
+			*bi = *bi + 1;
+			let key = (a.0, y);
+			match cells.get(&key)
 			{
-				intersects.insert((a.0, y));
+				Some(ai) => maybe_insert(intersects, key, *ai, *bi),
+				None => {}
 			}
 		}
 	}
@@ -103,9 +131,12 @@ fn check_all(cells: &HashSet<Cell>, intersects: &mut HashSet<Cell>, a: Cell, b: 
 	{
 		for x in a.0 .. b.0
 		{
-			if cells.contains(&(x + 1, a.1))
+			*bi = *bi + 1;
+			let key = (x + 1, a.1);
+			match cells.get(&key)
 			{
-				intersects.insert((x + 1, a.1));
+				Some(ai) => maybe_insert(intersects, key, *ai, *bi),
+				None => {}
 			}
 		}
 	}
@@ -113,9 +144,12 @@ fn check_all(cells: &HashSet<Cell>, intersects: &mut HashSet<Cell>, a: Cell, b: 
 	{
 		for x in b.0 .. a.0
 		{
-			if cells.contains(&(x, a.1))
+			*bi = *bi + 1;
+			let key = (x, a.1);
+			match cells.get(&key)
 			{
-				intersects.insert((x, a.1));
+				Some(ai) => maybe_insert(intersects, key, *ai, *bi),
+				None => {}
 			}
 		}
 	}
@@ -145,44 +179,47 @@ fn main()
 	
 	let wire1 = i0.trim().split(',');
 
-	let mut cells: HashSet<Cell> = HashSet::new();
+	let mut cells: HashMap<Cell, i32> = HashMap::new();
+	let mut ai = 0;
 	
 	let mut pos: Cell = (0, 0);
-	cells.insert(pos);
+	cells.insert(pos, 0);
+
 
 	wire1.for_each(|x|
 	{
 		match get_direction(x)
 		{
-		Direction::U { n } => pos = insert_all(&mut cells, pos, (pos.0, pos.1 + n)),
-		Direction::D { n } => pos = insert_all(&mut cells, pos, (pos.0, pos.1 - n)),
-		Direction::L { n } => pos = insert_all(&mut cells, pos, (pos.0 - n, pos.1)),
-		Direction::R { n } => pos = insert_all(&mut cells, pos, (pos.0 + n, pos.1)),
+		Direction::U { n } => pos = insert_all(&mut cells, pos, (pos.0, pos.1 + n), &mut ai),
+		Direction::D { n } => pos = insert_all(&mut cells, pos, (pos.0, pos.1 - n), &mut ai),
+		Direction::L { n } => pos = insert_all(&mut cells, pos, (pos.0 - n, pos.1), &mut ai),
+		Direction::R { n } => pos = insert_all(&mut cells, pos, (pos.0 + n, pos.1), &mut ai),
 		}
 	});
-	//cells.iter().for_each(print_position);
+	cells.iter().for_each(print_position);
 	
-	let mut i1 = String::new();
-
-	stdin.read_line(&mut i1)
-		.expect("Please enter the second wire");
-
-	let wire2 = i1.trim().split(',');
-	pos = (0, 0);
-
-	let mut intersects: HashSet<Cell> = HashSet::new();
-
-	wire2.for_each(|x|
-	{
-		match get_direction(x)
-		{
-		Direction::D { n } => pos = check_all(&cells, &mut intersects, pos, (pos.0, pos.1 - n)),
-		Direction::U { n } => pos = check_all(&cells, &mut intersects, pos, (pos.0, pos.1 + n)),
-		Direction::L { n } => pos = check_all(&cells, &mut intersects, pos, (pos.0 - n, pos.1)),
-		Direction::R { n } => pos = check_all(&cells, &mut intersects, pos, (pos.0 + n, pos.1)),
-		}
-	});
-	intersects.remove(&(0, 0));
-	println!("Minimum: {:?}", intersects.iter().map(distance).min());
+	//let mut i1 = String::new();
+    //
+	//stdin.read_line(&mut i1)
+	//	.expect("Please enter the second wire");
+    //
+	//let wire2 = i1.trim().split(',');
+	//pos = (0, 0);
+    //
+	//let mut intersects: HashMap<Cell> = HashMap::new();
+	//let mut bi = 0;
+    //
+	//wire2.for_each(|x|
+	//{
+	//	match get_direction(x)
+	//	{
+	//	Direction::D { n } => pos = check_all(&cells, &mut intersects, pos, (pos.0, pos.1 - n), &mut bi),
+	//	Direction::U { n } => pos = check_all(&cells, &mut intersects, pos, (pos.0, pos.1 + n), &mut bi),
+	//	Direction::L { n } => pos = check_all(&cells, &mut intersects, pos, (pos.0 - n, pos.1), &mut bi),
+	//	Direction::R { n } => pos = check_all(&cells, &mut intersects, pos, (pos.0 + n, pos.1), &mut bi),
+	//	}
+	//});
+	//intersects.remove(&(0, 0));
+	//println!("Minimum: {:?}", intersects.iter().map(distance).min());
 }
 
