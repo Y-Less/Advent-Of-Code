@@ -28,6 +28,17 @@ fn path_to(system: &HashMap<&str, LinkedList<&str>>, planet: &str, whom: &str) -
 				//Some(format!("{}-{}", planet, x))),
 			None => None,
 		}
+		// I later realised this would also work:
+		//
+		//  system.get(planet)
+		//  	.and_then(|orbits| orbits.iter()
+		//  		.fold(None, |acc, x| acc.or_else(|| path_to(system, x, whom)))
+		//  	)
+		//  	.and_then(|mut x|
+		//  	{
+		//  		x.push_front(planet.to_string());
+		//  		Some(x)
+		//  	}),
 	}
 }
 
