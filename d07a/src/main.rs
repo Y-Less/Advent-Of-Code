@@ -1,4 +1,7 @@
-use std::io;
+use std::fs::File;
+use std::io::prelude::*;
+use permutohedron::LexicalPermutation;
+
 //use std::iter;
 //use std::vec;
 
@@ -139,18 +142,15 @@ fn run(prog: &mut Vec<i32>, inputs: &mut Vec<i32>) -> i32
 	output
 }
 
-fn main()
+fn main() -> std::io::Result<()>
 {
-	println!("Enter the program.");
-	
-	let stdin = io::stdin();
-	//let mut vec = vec::Vec::new();
-	
 	let mut input = String::new();
-	
-	stdin.read_line(&mut input)
-		.expect("Please enter something");
-	
+	{
+		let mut file = File::open("../inputs/d07.txt")?;
+		file.read_to_string(&mut input)?;
+	}
+	let input = input;
+
 	let original = input.trim().split(',')
 		.map(|x| x.parse().expect("Not a number"))
 		.collect::<Vec<i32>>();
@@ -160,31 +160,42 @@ fn main()
 	//run(&mut prog, &mut (0..5));
 
 	// Test permutation.
-	let mut v = Vec::new();
-	v.push(0);
-	v.push(1);
-	v.push(3);
-	v.push(2);
-	v.push(4);
+	let mut settings = [0, 1, 2, 3, 4];
 
-	let mut input = 0;
+	//let mut v = Vec::new();
+	//v.push(0);
+	//v.push(1);
+	//v.push(3);
+	//v.push(2);
+	//v.push(4);
+
 	let mut highest = 0;
 
-	for x in v
+	loop
 	{
-		let mut inputs = Vec::new();
-		inputs.push(x);
-		inputs.push(input);
-
-		let mut prog = original.clone();
-		input = run(&mut prog, &mut inputs);
-
-		if input > highest
+		let mut input = 0;
+		for x in settings.to_vec()
 		{
-			highest = input;
+			let mut inputs = Vec::new();
+			inputs.push(x);
+			inputs.push(input);
+
+			let mut prog = original.clone();
+			input = run(&mut prog, &mut inputs);
+
+			if input > highest
+			{
+				highest = input;
+			}
+		}
+		if !settings.next_permutation()
+		{
+			break;
 		}
 	}
 
 	println!("{}", highest);
+
+	Ok(())
 }
 
