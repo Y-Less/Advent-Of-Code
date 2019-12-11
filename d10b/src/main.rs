@@ -4,13 +4,17 @@ use std::collections::LinkedList;
 
 fn gcd(a: i32, b: i32) -> i32
 {
-	let (mut a, mut b) = if a > b {
+	let (mut a, mut b) = if a > b
+	{
 		(a, b)
-	} else {
+	}
+	else
+	{
 		(b, a)
 	};
 
-	while b != 0 {
+	while b != 0
+	{
 		let r = a % b;
 		a = b;
 		b = r;
