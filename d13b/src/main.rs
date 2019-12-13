@@ -4,8 +4,7 @@ mod read;
 use crate::intcode::Program;
 use crate::intcode::ProgramState;
 use crate::intcode::ProgramResult;
-use crate::read::read;
-use std::{str, thread, time};
+use std::str;
 
 fn draw(grid: [[u8; 40]; 40], score: i64)
 {
@@ -19,8 +18,12 @@ fn draw(grid: [[u8; 40]; 40], score: i64)
 	}
 }
 
-fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; 40]; 40], score: &mut i64) -> bool
+type Pos = (usize, usize);
+
+fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; 40]; 40], score: &mut i64, ball: Pos, paddle: Pos) -> (bool, Pos, Pos)
 {
+	let mut ball = ball;
+	let mut paddle = paddle;
 	let mut s = 0;
 	let mut cmd = [0, 0, 0];
 	const TILES: [u8; 5] = [' ' as u8, '#' as u8, '%' as u8, '-' as u8, 'o' as u8];
@@ -44,6 +47,14 @@ fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; 40]; 40], score: &mut
 				{
 					//println!("{} {} {}", cmd[0], cmd[1], cmd[2]);
 					grid[cmd[1] as usize][cmd[0] as usize] = TILES[cmd[2] as usize];
+					if cmd[2] == 4
+					{
+						ball = (cmd[0] as usize, cmd[1] as usize);
+					}
+					if cmd[2] == 3
+					{
+						paddle = (cmd[0] as usize, cmd[1] as usize);
+					}
 				}
 				s = 0;
 			}
@@ -51,12 +62,12 @@ fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; 40]; 40], score: &mut
 		ProgramResult::Request =>
 		{
 			draw(*grid, *score);
-			return true;
+			return (true, ball, paddle);
 		}
 		ProgramResult::Halt =>
 		{
 			draw(*grid, *score);
-			return false;
+			return (false, ball, paddle);
 		}
 		}
 		//first = false;
@@ -87,30 +98,26 @@ fn main()
 	//let mut handle = stdin.lock();
 
 	let mut prog = ProgramState::load("../inputs/d13.txt");
-	run(&mut prog, 2, &mut grid, &mut score);
-	let sleep_time = time::Duration::from_millis(100);
+	
+	let mut ball: Pos = (0, 0);
+	let mut paddle: Pos = (0, 0);
+	let res = run(&mut prog, 2, &mut grid, &mut score, ball, paddle);
+	ball = res.1;
+	paddle = res.2;
 
 	loop
 	{
-		//println!("Hit enter to continue");
-		//println!("{}", read());
-		read();
-		let dir = read();
-		// < - 37
-		// > - 39
 		let dir =
-			if dir == 37 { -1 }
-			else if dir == 39 { 1 }
-			else if dir == 38 { 0 }
-			else { continue; };
-		//println!("{}", dir);
-		if !run(&mut prog, dir, &mut grid, &mut score)
+			if ball.0 < paddle.0 { -1 }
+			else if ball.0 > paddle.0 { 1 }
+			else { 0 };
+		let res = run(&mut prog, dir, &mut grid, &mut score, ball, paddle);
+		if !res.0
 		{
 			break;
 		}
-		let now = time::Instant::now();
-
-		thread::sleep(sleep_time);
+		ball = res.1;
+		paddle = res.2;
 	}
 }
 
