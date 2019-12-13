@@ -94,13 +94,15 @@ fn main()
 	{
 		//println!("Hit enter to continue");
 		//println!("{}", read());
+		read();
 		let dir = read();
 		// < - 37
 		// > - 39
 		let dir =
 			if dir == 37 { -1 }
 			else if dir == 39 { 1 }
-			else { 0 };
+			else if dir == 38 { 0 }
+			else { continue; };
 		//println!("{}", dir);
 		if !run(&mut prog, dir, &mut grid, &mut score)
 		{
@@ -111,3 +113,9 @@ fn main()
 		thread::sleep(sleep_time);
 	}
 }
+
+//49
+//	28
+//77
+//	17
+//94
