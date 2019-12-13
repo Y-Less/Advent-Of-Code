@@ -4,22 +4,9 @@ mod read;
 use crate::intcode::Program;
 use crate::intcode::ProgramState;
 use crate::intcode::ProgramResult;
-use std::str;
-use std::io::{self, Read};
-//extern crate ncurses_rs;
-//use ncurses_rs::context::*;
+use crate::read::read;
+use std::{str, thread, time};
 
-//fn halt(r: ProgramResult, io: bool) -> (bool, i64)
-//{
-//	match r
-//	{
-//	ProgramResult::Halt => (true, 0),
-//	ProgramResult::Response(v) =>
-//		if io { panic!("Expected a request"); } else { (false, v) }
-//	ProgramResult::Request =>
-//		if io { (false, 0) } else { panic!("Expected a response"); }
-//	}
-//}
 fn draw(grid: [[u8; 40]; 40], score: i64)
 {
 	//if std::process::Command::new("cls").status().unwrap().success() { }
@@ -32,18 +19,11 @@ fn draw(grid: [[u8; 40]; 40], score: i64)
 	}
 }
 
-fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; 40]; 40]) -> bool
+fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; 40]; 40], score: &mut i64) -> bool
 {
-	//let x = halt(prog.step(ProgramResult::Response(dir)), false);
-	//let y = halt(prog.step(ProgramResult::Request), false);
-	//let z = halt(prog.step(ProgramResult::Request), true);
-	//
-	//
 	let mut s = 0;
 	let mut cmd = [0, 0, 0];
-	//const TILES: [u8; 5] = [' ' as u8, '█' as u8, '▒' as u8, '─' as u8, '●' as u8];
 	const TILES: [u8; 5] = [' ' as u8, '#' as u8, '%' as u8, '-' as u8, 'o' as u8];
-	let mut score = 0;
 	//let mut first = true;
 	let mut res = if dir == 2 { ProgramResult::Request } else { ProgramResult::Response(dir) };
 	loop
@@ -58,7 +38,7 @@ fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; 40]; 40]) -> bool
 			{
 				if cmd[0] == -1
 				{
-					score = cmd[2]
+					*score = cmd[2]
 				}
 				else
 				{
@@ -70,12 +50,12 @@ fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; 40]; 40]) -> bool
 		}
 		ProgramResult::Request =>
 		{
-			draw(*grid, score);
+			draw(*grid, *score);
 			return true;
 		}
 		ProgramResult::Halt =>
 		{
-			draw(*grid, score);
+			draw(*grid, *score);
 			return false;
 		}
 		}
@@ -101,22 +81,33 @@ fn main()
 //	//	}
 //	//}
 
-	let mut buffer: [u8; 3] = [0, 0, 0];
 	let mut grid: [[u8; 40]; 40] = [[' ' as u8; 40]; 40];
-	let stdin = io::stdin();
-	let mut handle = stdin.lock();
+	let mut score = 0;
+	//let stdin = io::stdin();
+	//let mut handle = stdin.lock();
 
 	let mut prog = ProgramState::load("../inputs/d13.txt");
-	run(&mut prog, 2, &mut grid);
+	run(&mut prog, 2, &mut grid, &mut score);
+	let sleep_time = time::Duration::from_millis(100);
 
 	loop
 	{
-		println!("Hit enter to continue");
-		handle.read(&mut buffer).expect("");
-		println!("{}", buffer[0]);
-		if !run(&mut prog, 2, &mut grid)
+		//println!("Hit enter to continue");
+		//println!("{}", read());
+		let dir = read();
+		// < - 37
+		// > - 39
+		let dir =
+			if dir == 37 { -1 }
+			else if dir == 39 { 1 }
+			else { 0 };
+		//println!("{}", dir);
+		if !run(&mut prog, dir, &mut grid, &mut score)
 		{
 			break;
 		}
+		let now = time::Instant::now();
+
+		thread::sleep(sleep_time);
 	}
 }
