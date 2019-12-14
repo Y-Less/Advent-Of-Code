@@ -26,9 +26,27 @@ fn get_reactants(input: &str) -> LinkedList<Chemical>
 	ret
 }
 
+type Reactions = HashMap<Chemical, LinkedList<Chemical>>;
+
+fn get_ore_count(reactions: &Reactions, cur: String) -> i32
+{
+	if cur == "ORE"
+	{
+		return 1;
+	}
+	match reactions.get(cur)
+	{
+	Some(l) =>
+	{
+		l.iter().fold(|a, x| a + x.1 * get_ore_count(x.0), 0)
+	}
+	None => 0
+	}
+}
+
 fn main()
 {
-	let mut reactions = HashMap::<Chemical, LinkedList<Chemical>>::new();
+	let mut reactions: Reactions = HashMap::new();
 	let mut input = String::new();
 	let mut file = File::open("../inputs/d14.txt").expect("Could not read reactions file");
 	file.read_to_string(&mut input).expect("Could not read reactions file");
@@ -44,5 +62,6 @@ fn main()
 			reactions.insert(get_chemical(o), get_reactants(i));
 		});
 	
-	println!("{:?}", reactions);
+	println!("{:?}", get_ore_count(&reactions, "FUEL"));
 }
+
