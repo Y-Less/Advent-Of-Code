@@ -18,29 +18,67 @@ fn get_chemical(input: &str) -> Chemical
 
 fn get_reactants(input: &str) -> LinkedList<Chemical>
 {
-	let mut ret = LinkedList::new();
+	let mut reactants = LinkedList::new();
 
 	input.split(", ")
-		.for_each(|x| ret.push_back(get_chemical(x)));
+		.for_each(|x| reactants.push_back(get_chemical(x)));
 
-	ret
+	reactants
 }
 
-type Reactions = HashMap<Chemical, LinkedList<Chemical>>;
+type Reactions = HashMap<String, (i32, LinkedList<Chemical>)>;
 
-fn get_ore_count(reactions: &Reactions, cur: String) -> i32
+fn get_ore_count(reactions: &Reactions, excess: &mut HashMap<String, i32>, chemical: String, num: i32) -> i32
 {
-	if cur == "ORE"
+	if chemical == "ORE"
 	{
-		return 1;
+		// Need `n` ORE to make `n` ORE.
+		return num;
 	}
-	match reactions.get(cur)
+
+	let mut num = num;
+	match excess.get(&chemical)
 	{
-	Some(l) =>
+	Some(n) =>
 	{
-		l.iter().fold(|a, x| a + x.1 * get_ore_count(x.0), 0)
+		if *n >= num
+		{
+			num = *n - num;
+			excess.insert(chemical.to_string(), num);
+			return 0;
+		}
+		// Already made some of this, so no more raw inputs required.
+		num = num - *n;
+		// We may end up putting some back in later.
+		excess.insert(chemical.to_string(), 0);
 	}
-	None => 0
+	None => {}
+	}
+
+	match reactions.get(&chemical)
+	{
+	Some(input) =>
+	{
+		let per_loop = input.0;
+		let reactants = &input.1;
+		let mut ret = 0;
+		loop
+		{
+			// Get the ORE required to make one set of this input.
+			let req = reactants.iter().fold(0, |a, x| a + get_ore_count(reactions, excess, x.0.to_string(), x.1));
+			ret += req;
+			// One call to the reduction above gives enough inputs to make `per_loop` reactants.
+			if per_loop >= num
+			{
+				// We may have excess.
+				excess.insert(chemical.to_string(), per_loop - num);
+				break;
+			}
+			num = num - per_loop;
+		}
+		ret
+	}
+	None => panic!("Can't find chemical inputs."),
 	}
 }
 
@@ -59,9 +97,11 @@ fn main()
 			let i = io.next().unwrap();
 			let o = io.next().unwrap();
 
-			reactions.insert(get_chemical(o), get_reactants(i));
+			let c = get_chemical(o);
+			reactions.insert(c.0, (c.1, get_reactants(i)));
 		});
-	
-	println!("{:?}", get_ore_count(&reactions, "FUEL"));
+
+	let mut excess = HashMap::<String, i32>::new();
+	println!("{:?}", get_ore_count(&reactions, &mut excess, "FUEL".to_string(), 1));
 }
 
