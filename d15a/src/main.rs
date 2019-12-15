@@ -1,15 +1,28 @@
 mod intcode;
 mod clear;
-mod read;
+mod dijkstra;
+//mod read;
 use crate::intcode::Program;
 use crate::intcode::ProgramState;
 use crate::intcode::ProgramResult;
 use std::str;
-use crate::read::read;
+//use crate::read::read;
+//extern crate nalgebra;
+//extern crate dijkstra;
+//
+//use nalgebra::*;
+use crate::dijkstra::*;
+use std::collections::HashMap;
+use std::vec::Vec;
+use dijkstra::Vertex;
 
 type Pos = (usize, usize);
 
-fn draw(grid: [[u8; 70]; 70], bot: Pos)
+const DIM: usize = 42;
+const WHOLE: usize = DIM * DIM;	
+const START: Pos = (DIM / 2, DIM / 2);
+
+fn draw(grid: [[u8; DIM]; DIM], bot: Pos)
 {
 	crate::clear::clear();
 	for (i, x) in grid.iter().enumerate()
@@ -28,7 +41,7 @@ fn draw(grid: [[u8; 70]; 70], bot: Pos)
 	}
 }
 
-fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; 70]; 70], bot: Pos) -> (bool, Pos)
+fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; DIM]; DIM], bot: Pos, end: &mut Pos) -> (bool, Pos)
 {
 	let mut bot = bot;
 	const TILES: [u8; 4] = [' ' as u8, '#' as u8, '.' as u8, 'o' as u8];
@@ -75,6 +88,7 @@ fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; 70]; 70], bot: Pos) -
 				_ => {}
 				}
 				grid[bot.1][bot.0] = TILES[3];
+				*end = (bot.0, bot.1);
 				//draw(*grid, bot);
 				//return (true, bot);
 			}
@@ -98,35 +112,21 @@ fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; 70]; 70], bot: Pos) -
 
 fn main()
 {
-	let mut grid: [[u8; 70]; 70] = [[' ' as u8; 70]; 70];
+	let mut grid: [[u8; DIM]; DIM] = [[' ' as u8; DIM]; DIM];
 
 	let mut prog = ProgramState::load("../inputs/d15.txt");
 	
-	let mut bot: Pos = (35, 35);
-	//bot[]
-	run(&mut prog, 0, &mut grid, bot);
+	let mut bot: Pos = START;
+	let mut end: Pos = (0, 0);
+	run(&mut prog, 0, &mut grid, bot, &mut end);
 	let mut dir = 1;
 
 	let mut i = 0;
 	loop
 	{
-		//read();
-		//let dir = read();
-		//// < - 37
-		//// > - 39
-		//let dir =
-		//	if dir == 37 { 3 }
-		//	else if dir == 39 { 4 }
-		//	else if dir == 38 { 1 }
-		//	else if dir == 40 { 2 }
-		//	else { continue; };
-		//println!("{}", i);
-		let res = run(&mut prog, dir, &mut grid, bot);
-		//println!("{}", i);
+		let res = run(&mut prog, dir, &mut grid, bot, &mut end);
 		if !res.0
 		{
-			draw(grid, (35, 35));
-			println!("A");
 			break;
 		}
 		match dir
@@ -139,15 +139,113 @@ fn main()
 		}
 		bot = res.1;
 		i += 1;
-		if i % 10000 == 0
-		{
-			draw(grid, bot);
-		}
 		if i % 100000 == 0
 		{
-			draw(grid, (35, 35));
 			break;
 		}
+		//if i % 10000 == 0
+		//{
+		//	draw(grid, bot);
+		//}
 	}
+	draw(grid, (DIM / 2, DIM / 2));
+	// We now have a grid.  Build a very very simple matrix of single length node connections.
+	
+	//let no_connection = i32::max_value();
+	
+	//let mut matrix: [[i32; WHOLE]; WHOLE] = [[i32::max_value(); WHOLE]; WHOLE];
+	//let template = vec![i32::max_value(); WHOLE];
+	//let mut matrix: Vec<Vec<i32>> = vec![template.clone(); WHOLE];
+	//let template = vec![i32::max_value(); WHOLE];
+//	let mut matrix: Vec<i32> = vec![i32::max_value(); WHOLE * WHOLE];
+
+	const DOT: u8 = '.' as u8;
+	grid[START.1][START.0] = DOT; // Ensure we can get from the start point.
+	grid[end.1][end.0] = DOT; // Ensure we can get to the end point.
+	
+	let mut adj: HashMap<Vertex, Vec<(Vertex, usize)>> = HashMap::new();
+
+	for (y, row) in grid.iter().enumerate()
+	{
+		if y == 0 || y == DIM - 1
+		{
+			continue;
+		}
+		for (x, dot) in row.iter().enumerate()
+		{
+			if *dot != DOT
+			{
+				continue;
+			}
+			if x == 0 || x == DIM - 1
+			{
+				continue;
+			}
+			//let name = ;
+			let mut vec = Vec::new();
+//			let base = (y * DIM + x) * WHOLE;
+//			if grid[y - 1][x] == DOT
+//			{
+//				matrix[base + (y - 1) * DIM + x] = 1;
+//			}
+			if grid[y + 1][x] == DOT
+			{
+				vec.push((Vertex::new((x, y + 1)), 1));
+			}
+			if grid[y][x + 1] == DOT
+			{
+				vec.push((Vertex::new((x + 1, y)), 1));
+				//matrix[base + (y + 1) * DIM + x] = 1;
+			}
+			adj.insert(Vertex::new((x, y)), vec);
+//			if grid[y][x - 1] == DOT
+//			{
+//				matrix[base + y * DIM + (x - 1)] = 1;
+//			}
+//			if grid[y][x + 1] == DOT
+//			{
+//				matrix[base + y * DIM + (x + 1)] = 1;
+//			}
+		}
+	}
+
+//	let matrix = DMatrix::from_row_vector(WHOLE, WHOLE, &matrix);
+//	println!("{:?}", START);
+//	println!("{:?}", end);
+//	let start = START.1 * DIM + START.0;
+//	let end = end.1 * DIM + end.0;
+//	println!("{:?}", start);
+//	println!("{:?}", end);
+	//println!("{:?}", matrix);
+
+
+//	let path = dijkstra_path(&matrix, start, end);
+//	println!("{:?}", path);
+//
+//
+//	let path = dijkstra_table_gen(&matrix, start);
+//	print_matrix(&path.0, start);
+//	print_matrix(&path.0, end);
 }
+
+//fn print_matrix(matrix: &DMatrix<i32>, row: usize) -> ()
+//{
+//	println!("");
+//	let i: i32 = i32::max_value();
+////	for row in 0 .. matrix.nrows()
+//	{
+//		for item in matrix.row(row).iter()
+//		{
+//			if *item == i
+//			{
+//				print!("{}", "-");
+//			}
+//			else
+//			{
+//				print!("{}", item);
+//			};
+//		}
+//		println!("");
+//	}
+//}
 
