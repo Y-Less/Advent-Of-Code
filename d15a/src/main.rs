@@ -76,7 +76,7 @@ fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; 70]; 70], bot: Pos) -
 				}
 				grid[bot.1][bot.0] = TILES[3];
 				//draw(*grid, bot);
-				return (true, bot);
+				//return (true, bot);
 			}
 			_ => {}
 			}
@@ -120,10 +120,13 @@ fn main()
 		//	else if dir == 38 { 1 }
 		//	else if dir == 40 { 2 }
 		//	else { continue; };
+		//println!("{}", i);
 		let res = run(&mut prog, dir, &mut grid, bot);
+		//println!("{}", i);
 		if !res.0
 		{
 			draw(grid, (35, 35));
+			println!("A");
 			break;
 		}
 		match dir
@@ -136,9 +139,14 @@ fn main()
 		}
 		bot = res.1;
 		i += 1;
-		if i % 1000 == 0
+		if i % 10000 == 0
 		{
 			draw(grid, bot);
+		}
+		if i % 100000 == 0
+		{
+			draw(grid, (35, 35));
+			break;
 		}
 	}
 }
