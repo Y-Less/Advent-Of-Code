@@ -1,16 +1,11 @@
 mod intcode;
 mod clear;
 mod dijkstra;
-//mod read;
 use crate::intcode::Program;
 use crate::intcode::ProgramState;
 use crate::intcode::ProgramResult;
 use std::str;
-//use crate::read::read;
-//extern crate nalgebra;
-//extern crate dijkstra;
-//
-//use nalgebra::*;
+
 use crate::dijkstra::*;
 use std::collections::HashMap;
 use std::vec::Vec;
@@ -19,7 +14,6 @@ use dijkstra::Vertex;
 type Pos = (usize, usize);
 
 const DIM: usize = 42;
-const WHOLE: usize = DIM * DIM;	
 const START: Pos = (DIM / 2, DIM / 2);
 
 fn draw(grid: [[u8; DIM]; DIM], bot: Pos)
@@ -143,22 +137,10 @@ fn main()
 		{
 			break;
 		}
-		//if i % 10000 == 0
-		//{
-		//	draw(grid, bot);
-		//}
 	}
 	draw(grid, (DIM / 2, DIM / 2));
-	// We now have a grid.  Build a very very simple matrix of single length node connections.
-	
-	//let no_connection = i32::max_value();
-	
-	//let mut matrix: [[i32; WHOLE]; WHOLE] = [[i32::max_value(); WHOLE]; WHOLE];
-	//let template = vec![i32::max_value(); WHOLE];
-	//let mut matrix: Vec<Vec<i32>> = vec![template.clone(); WHOLE];
-	//let template = vec![i32::max_value(); WHOLE];
-//	let mut matrix: Vec<i32> = vec![i32::max_value(); WHOLE * WHOLE];
 
+	// We now have a grid.  Build a very very simple matrix of single length node connections.
 	const DOT: u8 = '.' as u8;
 	grid[START.1][START.0] = DOT; // Ensure we can get from the start point.
 	grid[end.1][end.0] = DOT; // Ensure we can get to the end point.
@@ -181,13 +163,7 @@ fn main()
 			{
 				continue;
 			}
-			//let name = ;
 			let mut vec = Vec::new();
-//			let base = (y * DIM + x) * WHOLE;
-//			if grid[y - 1][x] == DOT
-//			{
-//				matrix[base + (y - 1) * DIM + x] = 1;
-//			}
 			if grid[y + 1][x] == DOT
 			{
 				vec.push((Vertex::new((x, y + 1)), 1));
@@ -207,57 +183,22 @@ fn main()
 				//matrix[base + (y + 1) * DIM + x] = 1;
 			}
 			adj.insert(Vertex::new((x, y)), vec);
-//			if grid[y][x - 1] == DOT
-//			{
-//				matrix[base + y * DIM + (x - 1)] = 1;
-//			}
-//			if grid[y][x + 1] == DOT
-//			{
-//				matrix[base + y * DIM + (x + 1)] = 1;
-//			}
 		}
 	}
 
-//	let matrix = DMatrix::from_row_vector(WHOLE, WHOLE, &matrix);
-//	println!("{:?}", START);
-//	println!("{:?}", end);
-//	let start = START.1 * DIM + START.0;
-//	let end = end.1 * DIM + end.0;
-//	println!("{:?}", start);
-//	println!("{:?}", end);
-	//println!("{:?}", matrix);
+	let end = Vertex::new((end.0, end.1));
+	let start = Vertex::new((START.0, START.1));
 
-
-//	let path = dijkstra_path(&matrix, start, end);
-//	println!("{:?}", path);
-//
-//
-//	let path = dijkstra_table_gen(&matrix, start);
-//	print_matrix(&path.0, start);
-//	print_matrix(&path.0, end);
-	let ret = dijkstra(Vertex::new((START.1, START.0)), &adj);
+	let ret = dijkstra(start, &adj);
 	println!("{:?}", ret);
-	println!("{:?}", ret.get(&Vertex::new((end.1, end.0))));
-}
+	println!("{:?}", "end");
+	println!("{:?}", ret.get(&end));
 
-//fn print_matrix(matrix: &DMatrix<i32>, row: usize) -> ()
-//{
-//	println!("");
-//	let i: i32 = i32::max_value();
-////	for row in 0 .. matrix.nrows()
-//	{
-//		for item in matrix.row(row).iter()
-//		{
-//			if *item == i
-//			{
-//				print!("{}", "-");
-//			}
-//			else
-//			{
-//				print!("{}", item);
-//			};
-//		}
-//		println!("");
-//	}
-//}
+	let ret = dijkstra(end, &adj);
+	println!("{:?}", ret);
+	
+	let max = ret.iter().fold(0, |c, x| if c > *x.1 as i32 { c } else { *x.1 as i32 });
+	println!("{:?}", "max");
+	println!("{:?}", max);
+}
 
