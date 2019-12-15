@@ -9,7 +9,7 @@ use crate::read::read;
 
 type Pos = (usize, usize);
 
-fn draw(grid: [[u8; 150]; 150], bot: Pos)
+fn draw(grid: [[u8; 70]; 70], bot: Pos)
 {
 	crate::clear::clear();
 	for (i, x) in grid.iter().enumerate()
@@ -28,7 +28,7 @@ fn draw(grid: [[u8; 150]; 150], bot: Pos)
 	}
 }
 
-fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; 150]; 150], bot: Pos) -> (bool, Pos)
+fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; 70]; 70], bot: Pos) -> (bool, Pos)
 {
 	let mut bot = bot;
 	const TILES: [u8; 4] = [' ' as u8, '#' as u8, '.' as u8, 'o' as u8];
@@ -75,20 +75,20 @@ fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; 150]; 150], bot: Pos)
 				_ => {}
 				}
 				grid[bot.1][bot.0] = TILES[3];
-				draw(*grid, bot);
-				return (false, bot);
+				//draw(*grid, bot);
+				return (true, bot);
 			}
 			_ => {}
 			}
 		}
 		ProgramResult::Request =>
 		{
-			draw(*grid, bot);
+			//draw(*grid, bot);
 			return (true, bot);
 		}
 		ProgramResult::Halt =>
 		{
-			draw(*grid, bot);
+			//draw(*grid, bot);
 			return (false, bot);
 		}
 		}
@@ -98,31 +98,48 @@ fn run(prog: &mut ProgramState, dir: i64, grid: &mut [[u8; 150]; 150], bot: Pos)
 
 fn main()
 {
-	let mut grid: [[u8; 150]; 150] = [[' ' as u8; 150]; 150];
+	let mut grid: [[u8; 70]; 70] = [[' ' as u8; 70]; 70];
 
 	let mut prog = ProgramState::load("../inputs/d15.txt");
 	
-	let mut bot: Pos = (100, 100);
+	let mut bot: Pos = (35, 35);
+	//bot[]
 	run(&mut prog, 0, &mut grid, bot);
+	let mut dir = 1;
 
+	let mut i = 0;
 	loop
 	{
-		read();
-		let dir = read();
-		// < - 37
-		// > - 39
-		let dir =
-			if dir == 37 { 3 }
-			else if dir == 39 { 4 }
-			else if dir == 38 { 1 }
-			else if dir == 40 { 2 }
-			else { continue; };
+		//read();
+		//let dir = read();
+		//// < - 37
+		//// > - 39
+		//let dir =
+		//	if dir == 37 { 3 }
+		//	else if dir == 39 { 4 }
+		//	else if dir == 38 { 1 }
+		//	else if dir == 40 { 2 }
+		//	else { continue; };
 		let res = run(&mut prog, dir, &mut grid, bot);
 		if !res.0
 		{
+			draw(grid, (35, 35));
 			break;
 		}
+		match dir
+		{
+		1 => if grid[bot.1 - 1][bot.0] == '#' as u8 { dir = 4; } else { dir = 3; },
+		2 => if grid[bot.1 + 1][bot.0] == '#' as u8 { dir = 3; } else { dir = 4; },
+		3 => if grid[bot.1][bot.0 - 1] == '#' as u8 { dir = 1; } else { dir = 2; },
+		4 => if grid[bot.1][bot.0 + 1] == '#' as u8 { dir = 2; } else { dir = 1; },
+		_ => {}
+		}
 		bot = res.1;
+		i += 1;
+		if i % 1000 == 0
+		{
+			draw(grid, bot);
+		}
 	}
 }
 
