@@ -197,6 +197,15 @@ fn main()
 				vec.push((Vertex::new((x + 1, y)), 1));
 				//matrix[base + (y + 1) * DIM + x] = 1;
 			}
+			if grid[y - 1][x] == DOT
+			{
+				vec.push((Vertex::new((x, y - 1)), 1));
+			}
+			if grid[y][x - 1] == DOT
+			{
+				vec.push((Vertex::new((x - 1, y)), 1));
+				//matrix[base + (y + 1) * DIM + x] = 1;
+			}
 			adj.insert(Vertex::new((x, y)), vec);
 //			if grid[y][x - 1] == DOT
 //			{
@@ -226,6 +235,9 @@ fn main()
 //	let path = dijkstra_table_gen(&matrix, start);
 //	print_matrix(&path.0, start);
 //	print_matrix(&path.0, end);
+	let ret = dijkstra(Vertex::new((START.1, START.0)), &adj);
+	println!("{:?}", ret);
+	println!("{:?}", ret.get(&Vertex::new((end.1, end.0))));
 }
 
 //fn print_matrix(matrix: &DMatrix<i32>, row: usize) -> ()

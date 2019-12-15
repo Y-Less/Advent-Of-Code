@@ -73,11 +73,11 @@ pub fn dijkstra(
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Vertex {
-    name: (i32, i32),
+    name: (usize, usize),
 }
 
 impl Vertex {
-    fn new(name: (i32, i32)) -> Vertex {
+    pub fn new(name: (usize, usize)) -> Vertex {
         Vertex { name }
     }
 }
