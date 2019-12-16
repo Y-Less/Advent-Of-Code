@@ -84,6 +84,10 @@ fn find_digit(idx: usize, phase: usize, cache: &mut HashMap<(usize, usize), i32>
 	}
 	let ret = total.abs() * frac % 10;
 	cache.insert(name, ret);
+	if phase == PHASES - 2
+	{
+		println!("{}", ret);
+	}
 	return ret;
 }
 
