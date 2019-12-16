@@ -9,19 +9,11 @@ const OFFSET: usize = 5977603;
 
 fn main()
 {
-	let mut input = Vec::new();
-	input.resize(LEN, 0);
-	for j in 0 .. DUP
-	{
-		for (i, ch) in ORIGINAL.iter().enumerate()
-		{
-			input[j * BASE + i] = *ch;
-		}
-	}
+	let mut input: Vec<i32> = ORIGINAL.iter().cycle().take(LEN).cloned().collect();
 
-	for phase in 0 .. PHASES
+	for _phase in 0 .. PHASES
 	{
-		println!("Phase {}", phase);
+		//println!("Phase {}", phase);
 		let mut output = Vec::new();
 		output.resize(LEN, 0);
 
