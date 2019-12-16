@@ -1,65 +1,55 @@
-//#![feature(generators, generator_trait)]
+//const PHASES: usize = 100;
+//const DUP: usize = 10000;
+//const BASE: usize = 650;
+//const LEN: usize = BASE * DUP;
 //
-//use std::ops::{Generator, GeneratorState};
-//use std::pin::Pin;
-use std::vec::Vec;
+//const ORIGINAL: [i32; BASE] = [5, 9, 7, 7, 6, 0, 3, 4, 0, 9, 5, 8, 1, 1, 6, 4, 4, 5, 4, 5, 3, 6, 7, 7, 9, 3, 1, 7, 9, 9, 8, 9, 6, 0, 2, 1, 4, 0, 9, 4, 8, 7, 1, 4, 4, 0, 6, 2, 3, 4, 6, 9, 4, 9, 7, 2, 8, 9, 4, 4, 8, 5, 0, 6, 6, 5, 2, 3, 5, 2, 5, 7, 4, 2, 5, 0, 3, 9, 8, 6, 7, 7, 1, 9, 1, 2, 0, 1, 9, 0, 3, 2, 9, 2, 2, 7, 8, 8, 4, 9, 4, 9, 0, 0, 6, 5, 5, 8, 5, 5, 4, 5, 8, 0, 8, 6, 9, 7, 9, 7, 6, 4, 6, 1, 7, 3, 7, 5, 5, 8, 0, 8, 0, 2, 5, 5, 8, 9, 6, 3, 5, 8, 7, 0, 2, 5, 7, 8, 4, 9, 1, 8, 8, 8, 2, 2, 1, 9, 6, 1, 0, 8, 3, 1, 9, 4, 0, 9, 9, 2, 3, 9, 9, 2, 0, 1, 7, 8, 2, 3, 8, 5, 6, 7, 4, 2, 2, 3, 2, 8, 4, 4, 1, 1, 4, 9, 9, 2, 3, 7, 6, 1, 9, 8, 0, 0, 1, 9, 3, 8, 7, 9, 7, 6, 8, 6, 6, 8, 2, 1, 0, 1, 6, 2, 1, 7, 6, 3, 9, 4, 6, 0, 7, 5, 0, 2, 2, 1, 8, 6, 0, 2, 6, 3, 3, 1, 5, 3, 7, 7, 2, 0, 6, 2, 9, 7, 3, 1, 4, 9, 5, 3, 3, 6, 5, 0, 5, 6, 2, 5, 5, 4, 9, 4, 2, 5, 7, 4, 5, 9, 3, 8, 7, 8, 0, 7, 3, 2, 3, 8, 2, 3, 2, 5, 6, 3, 6, 4, 9, 6, 7, 3, 8, 5, 8, 1, 6, 7, 6, 3, 5, 3, 7, 8, 6, 9, 5, 1, 9, 0, 3, 5, 6, 1, 5, 9, 7, 9, 6, 3, 4, 2, 2, 0, 4, 7, 5, 9, 3, 9, 3, 1, 5, 6, 2, 9, 4, 6, 5, 8, 3, 6, 6, 2, 7, 9, 9, 2, 2, 7, 3, 4, 2, 1, 3, 3, 8, 5, 1, 4, 4, 8, 9, 5, 1, 1, 6, 6, 4, 9, 7, 6, 8, 1, 8, 5, 9, 6, 6, 8, 6, 6, 2, 0, 2, 4, 1, 3, 3, 1, 4, 9, 3, 9, 6, 9, 2, 1, 7, 4, 2, 2, 3, 2, 1, 0, 4, 8, 4, 9, 3, 3, 6, 7, 8, 8, 6, 6, 4, 7, 8, 9, 4, 4, 1, 0, 4, 9, 7, 8, 8, 9, 0, 0, 1, 9, 7, 2, 8, 5, 6, 2, 0, 0, 1, 4, 1, 7, 7, 4, 6, 6, 5, 6, 6, 9, 9, 2, 8, 1, 9, 9, 2, 0, 2, 8, 3, 5, 6, 0, 0, 4, 8, 8, 8, 8, 6, 0, 1, 0, 3, 8, 0, 5, 4, 7, 2, 8, 6, 6, 6, 1, 5, 2, 4, 3, 5, 4, 4, 7, 8, 1, 3, 7, 7, 7, 4, 8, 6, 5, 4, 4, 7, 1, 7, 5, 0, 5, 6, 0, 8, 3, 0, 0, 9, 9, 0, 4, 8, 7, 4, 7, 5, 7, 0, 9, 2, 5, 9, 0, 2, 5, 7, 5, 7, 6, 5, 0, 5, 4, 8, 9, 8, 8, 9, 9, 5, 1, 2, 3, 0, 3, 9, 1, 7, 1, 5, 9, 1, 3, 8, 0, 9, 7, 3, 7, 5, 3, 3, 8, 4, 4, 4, 6, 1, 0, 8, 0, 9, 8, 9, 1, 6, 6, 7, 0, 9, 4, 0, 5, 1, 1, 0, 8, 3, 5, 9, 1, 3, 4, 0, 1, 7, 1, 2, 8, 0, 2, 8, 1, 7, 4, 2, 3, 0, 7, 2, 0, 3, 9, 8, 9, 6, 5, 9, 6, 0, 7, 1, 2];
 
-const PHASES: i32 = 100;
-const DUP: usize = 10000;
-const BASE: usize = 650;
+//const PHASES: usize = 100;
+//const DUP: usize = 1;
+//const BASE: usize = 32;
+//const LEN: usize = BASE * DUP;
+//
+//const ORIGINAL: [i32; BASE] = [1, 9, 6, 1, 7, 8, 0, 4, 2, 0, 7, 2, 0, 2, 2, 0, 9, 1, 4, 4, 9, 1, 6, 0, 4, 4, 1, 8, 9, 9, 1, 7];
+
+const PHASES: usize = 4;
+const DUP: usize = 1;
+const BASE: usize = 8;
 const LEN: usize = BASE * DUP;
+
+const ORIGINAL: [i32; BASE] = [1, 2, 3, 4, 5, 6, 7, 8];
+
+fn find_digit(idx: usize, phase: usize) -> i32
+{
+	if phase == 0
+	{
+		return ORIGINAL[idx % BASE];
+	}
+	let phase = phase - 1;
+	let mut total = 0;
+	let mut j = idx;
+	let mut e = j + idx + 1;
+	let mut mul = 1;
+	loop
+	{
+		if j >= e
+		{
+			j = e + idx + 1;
+			e = j + idx + 1;
+			mul = -mul;
+		}
+		if j >= LEN
+		{
+			break;
+		}
+		total += find_digit(j, phase) * mul;
+		j += 1;
+	}
+	return total.abs() % 10;
+}
 
 fn main()
 {
-	let original = "59776034095811644545367793179989602140948714406234694972894485066523525742503986771912019032922788494900655855458086979764617375580802558963587025784918882219610831940992399201782385674223284411499237619800193879768668210162176394607502218602633153772062973149533650562554942574593878073238232563649673858167635378695190356159796342204759393156294658366279922734213385144895116649768185966866202413314939692174223210484933678866478944104978890019728562001417746656699281992028356004888860103805472866615243544781377748654471750560830099048747570925902575765054898899512303917159138097375338444610809891667094051108359134017128028174230720398965960712";
-	// let original = "19617804207202209144916044189917";
-
-	let mut input = Vec::new();
-	input.resize(LEN, 0);
-	for j in 0 .. DUP
-	{
-		for (i, ch) in original.bytes().enumerate()
-		{
-			input[j * BASE + i] = ch as i32 - 48;
-		}
-	}
-
-	for phase in 0 .. PHASES
-	{
-		//let mut output: [i32; LEN] = [0; LEN];
-		let mut output = Vec::new();
-		output.resize(LEN, 0);
-		println!("PHASE: {}", phase + 1);
-		//for (i, _) in input.iter().enumerate()
-		for i in 0 .. LEN
-		{
-			let mut total = 0;
-			let mut j = i;
-			let mut e = j + i + 1;
-			let mut mul = 1;
-			loop
-			{
-				// Skip all the zeros.
-				if j >= e
-				{
-					j = e + i + 1;
-					e = j + i + 1;
-					mul = -mul;
-				}
-				if j >= LEN
-				{
-					break;
-				}
-				total += input[j] * mul;
-				j += 1;
-			}
-			output[i] = total.abs() % 10;
-		}
-		input = output;
-	}
-	
-	let offset = 0;
-    println!("{}{}{}{}{}{}{}{}", input[offset + 0], input[offset + 1], input[offset + 2], input[offset + 3], input[offset + 4], input[offset + 5], input[offset + 6], input[offset + 7]);
-	let offset = (100000 * input[0] + 10000 * input[1] + 1000 * input[2] + 100 * input[3] + 10 * input[4] + input[5]) as usize;
-    println!("{}{}{}{}{}{}{}{}", input[offset + 0], input[offset + 1], input[offset + 2], input[offset + 3], input[offset + 4], input[offset + 5], input[offset + 6], input[offset + 7]);
+	println!("{}{}{}{}{}{}{}{}", find_digit(0, PHASES), find_digit(1, PHASES), find_digit(2, PHASES), find_digit(3, PHASES), find_digit(4, PHASES), find_digit(5, PHASES), find_digit(6, PHASES), find_digit(7, PHASES));
 }
+
