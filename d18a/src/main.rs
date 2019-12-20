@@ -89,13 +89,86 @@ const INPUT: [&str; 81] = [
 ];
 
 type Pos = (usize, usize);
+type Grid = Vec<Vec<u8>>;
+//type Nodes = HashMap;
 
-//fn clone[T](vec: &mut Vec<T>, idx: usize) -> T
-//{
-//	let ret = vec[idx].clone();
-//	vec.push(ret);
-//	vec.swap_remove(idx)
-//}
+const WALL: u8 = '#' as u8;
+const WALL: u8 = '#' as u8;
+
+fn is_path(grid: &Grid, pos: Pos) -> bool
+{
+	// '.', '@'
+	grid[pos.1][pos.0] == 0x2E || grid[pos.1][pos.0] == 0x40
+}
+
+fn is_door(grid: &Grid, pos: Pos) -> bool
+{
+	// 'A' - 'Z'
+	grid[pos.1][pos.0] >= 0x41 && grid[pos.1][pos.0] <= 0x5A
+}
+
+fn is_key(grid: &Grid, pos: Pos) -> bool
+{
+	// 'a' - 'z'
+	grid[pos.1][pos.0] >= 0x61 && grid[pos.1][pos.0] <= 0x7A
+}
+
+fn is_wall(grid: &Grid, pos: Pos) -> bool
+{
+	// '#'
+	grid[pos.1][pos.0] == 0x23
+}
+
+fn is_not_wall(grid: &Grid, pos: Pos) -> bool
+{
+	is_path(grid, pos) || is_door(grid, pos) || is_key(grid, pos)
+}
+
+fn find_nodes(grid: &Grid) -> (Vec<Pos>, Vec<Pos>, Vec<Pos>)
+{
+	let mut ret = Vec::new();
+
+	for (y, row) in grid.iter().enumerate()
+	{
+		if y == 0 || y == grid.length() - 1
+		{
+			continue;
+		}
+		let len = row.length() - 1;
+		for (x, ch) in row.iter().enumerate()
+		{
+			if x == 0 || x == len
+			{
+				continue;
+			}
+			if ch == WALL
+			{
+				continue;
+			}
+			// Something is a node if:
+			//
+			//   1) It has 3 or 4 adjacent non-walls.
+			//   2) It has 2 adjacent non-walls, one of them a door or key.
+			//   3) It is a door or a key.
+			//
+			if (grid[y - 1][x - 1] != WALL && grid[y - 1][x + 1] != WALL && grid[y + 1][x - 1] == WALL && grid[y + 1][x + 1] == WALL)
+			|| (grid[y - 1][x - 1] != WALL && grid[y - 1][x + 1] == WALL && grid[y + 1][x - 1] != WALL && grid[y + 1][x + 1] == WALL)
+			|| (grid[y - 1][x - 1] == WALL && grid[y - 1][x + 1] != WALL && grid[y + 1][x - 1] != WALL && grid[y + 1][x + 1] == WALL)
+			|| (grid[y - 1][x - 1] != WALL && grid[y - 1][x + 1] == WALL && grid[y + 1][x - 1] == WALL && grid[y + 1][x + 1] != WALL)
+			|| (grid[y - 1][x - 1] == WALL && grid[y - 1][x + 1] != WALL && grid[y + 1][x - 1] == WALL && grid[y + 1][x + 1] != WALL)
+			|| (grid[y - 1][x - 1] == WALL && grid[y - 1][x + 1] == WALL && grid[y + 1][x - 1] != WALL && grid[y + 1][x + 1] != WALL)
+			{
+				// Exactly two adjacent paths.  Not a node.
+			}
+			else
+			{
+				// 1 or 3 or 4.
+			}
+		}
+	}
+
+	ret
+}
 
 fn test_keys(keys: &HashMap<u8, Pos>, doors: &HashMap<u8, Pos>, grid: &mut Vec<Vec<u8>>, pos: Pos) -> usize
 {
