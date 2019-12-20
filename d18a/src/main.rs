@@ -1,7 +1,6 @@
 mod dijkstra;
 use crate::dijkstra::*;
 use std::vec::Vec;
-use dijkstra::Vertex;
 use std::char;
 use std::collections::HashMap;
 
@@ -89,11 +88,72 @@ const INPUT: [&str; 81] = [
 	"#################################################################################",
 ];
 
-type Pos = (i64, i64);
+type Pos = (usize, usize);
+
+//fn clone[T](vec: &mut Vec<T>, idx: usize) -> T
+//{
+//	let ret = vec[idx].clone();
+//	vec.push(ret);
+//	vec.swap_remove(idx)
+//}
+
+fn test_keys(keys: &HashMap<u8, Pos>, doors: &HashMap<u8, Pos>, grid: &mut Vec<Vec<u8>>, pos: Pos) -> usize
+{
+	let adj = build_adjacency(grid);
+	let d = dijkstra(pos, &adj);
+
+	let mut min = std::usize::MAX;
+
+	for k in keys.iter()
+	{
+		//println!("{}: {:?}", char::from_u32(*k.0 as u32).expect(""), d.get(k.1));
+		match d.get(k.1)
+		{
+		None => {},
+		Some(len) =>
+		{
+			// Remove the specified door and key, then recurse.
+			let key = *k.0;
+			let door = key - 0x20;
+			let pos = doors[&door];
+			// println!("{}: {:?}", char::from_u32(door as u32).expect(""), pos);
+			//println!("==");
+			let mut row = grid[pos.1].clone();
+			row[pos.0] = 0x2E;
+			let mut keys = keys.clone();
+			let mut doors = doors.clone();
+			keys.remove(&key);
+			doors.remove(&door);
+			//println!("{:?}", keys);
+			//println!("{:?}", doors);
+			//println!("{:?}", pos.1);
+			
+			grid.push(row);
+			let row = grid.swap_remove(pos.1);
+			
+			let ret = test_keys(&keys, &doors, grid, pos);
+			if ret < std::usize::MAX
+			{
+				let ret = ret + len;
+				if ret < min
+				{
+					//println!("{:?}", min);
+					min = ret;
+				}
+			}
+			
+			// Put the door back.
+			grid[pos.1] = row;
+		}
+		}
+	}
+
+	min
+}
 
 fn main()
 {
-	let mut vec = Vec::new();
+	let mut grid = Vec::new();
 
 	let mut keys = HashMap::new();
 	let mut doors = HashMap::new();
@@ -123,10 +183,12 @@ fn main()
 			}
 			v2.push(*ch);
 		}
-		vec.push(v2);
+		grid.push(v2);
 	}
-	
-	let adj = build_adjacency(&vec);
-	println!("{:?}", keys.clone());
+
+	let ret = test_keys(&keys, &doors, &mut grid, start);
+	//let adj = build_adjacency(&vec);
+	//println!("{:?}", keys.clone());
+	println!("{:?}", ret);
 }
 

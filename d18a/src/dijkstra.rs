@@ -1,9 +1,9 @@
 use std::{ vec::Vec, cmp::Ordering, collections::{ BinaryHeap, HashMap, HashSet } };
 
 pub fn dijkstra(
-    start: Vertex,
-    adjacency_list: &HashMap<Vertex, Vec<(Vertex, usize)>>,
-) -> HashMap<Vertex, usize>
+    start: (usize, usize),
+    adjacency_list: &HashMap<(usize, usize), Vec<((usize, usize), usize)>>,
+) -> HashMap<(usize, usize), usize>
 {
     let mut distances = HashMap::new();
     let mut visited = HashSet::new();
@@ -51,9 +51,9 @@ fn is_wall(ch: u8) -> bool
 	ch == 0x23 || (ch >= 0x41 && ch <= 0x5A)
 }
 
-pub fn build_adjacency(grid: &Vec<Vec<u8>>) -> HashMap<Vertex, Vec<(Vertex, usize)>>
+pub fn build_adjacency(grid: &Vec<Vec<u8>>) -> HashMap<(usize, usize), Vec<((usize, usize), usize)>>
 {
-	let mut adj: HashMap<Vertex, Vec<(Vertex, usize)>> = HashMap::new();
+	let mut adj: HashMap<(usize, usize), Vec<((usize, usize), usize)>> = HashMap::new();
 
 	for (y, row) in grid.iter().enumerate()
 	{
@@ -66,38 +66,27 @@ pub fn build_adjacency(grid: &Vec<Vec<u8>>) -> HashMap<Vertex, Vec<(Vertex, usiz
 			let mut vec = Vec::new();
 			if !is_wall(grid[y + 1][x])
 			{
-				vec.push((Vertex::new((x, y + 1)), 1));
+				vec.push(((x, y + 1), 1));
 			}
 			if !is_wall(grid[y][x + 1])
 			{
-				vec.push((Vertex::new((x + 1, y)), 1));
+				vec.push(((x + 1, y), 1));
 				//matrix[base + (y + 1) * DIM + x] = 1;
 			}
 			if !is_wall(grid[y - 1][x])
 			{
-				vec.push((Vertex::new((x, y - 1)), 1));
+				vec.push(((x, y - 1), 1));
 			}
 			if !is_wall(grid[y][x - 1])
 			{
-				vec.push((Vertex::new((x - 1, y)), 1));
+				vec.push(((x - 1, y), 1));
 				//matrix[base + (y + 1) * DIM + x] = 1;
 			}
-			adj.insert(Vertex::new((x, y)), vec);
+			adj.insert((x, y), vec);
 		}
 	}
 
 	adj
-}
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub struct Vertex {
-    name: (usize, usize),
-}
-
-impl Vertex {
-    pub fn new(name: (usize, usize)) -> Vertex {
-        Vertex { name }
-    }
 }
 
 #[derive(Debug)]
