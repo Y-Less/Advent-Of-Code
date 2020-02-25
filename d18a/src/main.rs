@@ -110,145 +110,83 @@ const INPUT: [&str; 5] = [
 
 type Pos = (usize, usize);
 type Grid = Vec<Vec<u8>>;
-//type Nodes = HashMap;
 
-const WALL: u8 = '#' as u8;
-
-fn is_path(grid: &Grid, pos: Pos) -> bool
-{
-	// '.', '@'
-	grid[pos.1][pos.0] == 0x2E || grid[pos.1][pos.0] == 0x40
-}
-
-fn is_door(grid: &Grid, pos: Pos) -> bool
+fn is_door(ch: u8) -> bool
 {
 	// 'A' - 'Z'
-	grid[pos.1][pos.0] >= 0x41 && grid[pos.1][pos.0] <= 0x5A
+	ch >= 0x41 && ch <= 0x5A
 }
 
-fn is_key(grid: &Grid, pos: Pos) -> bool
+fn is_key(ch: u8) -> bool
 {
 	// 'a' - 'z'
-	grid[pos.1][pos.0] >= 0x61 && grid[pos.1][pos.0] <= 0x7A
+	ch >= 0x61 && ch <= 0x7A
 }
 
-fn is_wall(grid: &Grid, pos: Pos) -> bool
+fn is_wall(ch: u8) -> bool
 {
 	// '#'
-	grid[pos.1][pos.0] == 0x23
+	ch == 0x23
 }
 
-fn is_not_wall(grid: &Grid, pos: Pos) -> bool
-{
-	is_path(grid, pos) || is_door(grid, pos) || is_key(grid, pos)
-}
+type NodeList = HashMap<u8, Pos>;
 
-fn find_nodes(grid: &Grid) -> (Vec<Pos>, Vec<Pos>, Vec<Pos>)
+//pub fn build_adjacency(grid: &Vec<Vec<u8>>) -> HashMap<(usize, usize), Vec<((usize, usize), usize)>>
+//{
+//	let mut adj: HashMap<(usize, usize), Vec<((usize, usize), usize)>> = HashMap::new();
+//
+//
+//	adj
+//}
+
+fn build_all_links(grid: &Grid, keys: &NodeList, doors: &NodeList)
 {
-	let mut ret = Vec::new();
+	let mut adj: HashMap<(usize, usize), Vec<((usize, usize), usize)>> = HashMap::new();
+
+	// Append the two node type arrays.
+	let nodes = doors.clone().drain().fold(keys.clone(), |mut o, c| { o.insert(c.0, c.1); o });
 
 	for (y, row) in grid.iter().enumerate()
 	{
-		if y == 0 || y == grid.length() - 1
+		for (x, dot) in row.iter().enumerate()
 		{
-			continue;
-		}
-		let len = row.length() - 1;
-		for (x, ch) in row.iter().enumerate()
-		{
-			if x == 0 || x == len
+			if is_wall(*dot)
 			{
 				continue;
 			}
-			if ch == WALL
+			let mut vec = Vec::new();
+			if !is_wall(grid[y + 1][x])
 			{
-				continue;
+				vec.push(((x, y + 1), 1));
 			}
-			// Something is a node if:
-			//
-			//   1) It has 3 or 4 adjacent non-walls.
-			//   2) It has 2 adjacent non-walls, one of them a door or key.
-			//   3) It is a door or a key.
-			//
-			if (ch >= 0x41 && ch <= 0x5A) // Door
-			|| (ch >= 0x61 && ch <= 0x7A) // Key
-			|| (is_path(grid, (x, y - 1)) && is_path(grid, (x, y + 1)) && is_path(grid, (x - 1, y)))
-			|| (is_path(grid, (x, y - 1)) && is_path(grid, (x, y + 1)) && is_path(grid, (x + 1, y)))
-			|| (is_path(grid, (x, y - 1)) && is_path(grid, (x - 1, y)) && is_path(grid, (x + 1, y)))
-			|| (is_path(grid, (x, y + 1)) && is_path(grid, (x - 1, y)) && is_path(grid, (x + 1, y)))
-			|| ()
-
-			if (grid[y - 1][x - 1] != WALL && grid[y - 1][x + 1] != WALL && grid[y + 1][x - 1] == WALL && grid[y + 1][x + 1] == WALL)
-			|| (grid[y - 1][x - 1] != WALL && grid[y - 1][x + 1] == WALL && grid[y + 1][x - 1] != WALL && grid[y + 1][x + 1] == WALL)
-			|| (grid[y - 1][x - 1] == WALL && grid[y - 1][x + 1] != WALL && grid[y + 1][x - 1] != WALL && grid[y + 1][x + 1] == WALL)
-			|| (grid[y - 1][x - 1] != WALL && grid[y - 1][x + 1] == WALL && grid[y + 1][x - 1] == WALL && grid[y + 1][x + 1] != WALL)
-			|| (grid[y - 1][x - 1] == WALL && grid[y - 1][x + 1] != WALL && grid[y + 1][x - 1] == WALL && grid[y + 1][x + 1] != WALL)
-			|| (grid[y - 1][x - 1] == WALL && grid[y - 1][x + 1] == WALL && grid[y + 1][x - 1] != WALL && grid[y + 1][x + 1] != WALL)
+			if !is_wall(grid[y][x + 1])
 			{
-				// Exactly two adjacent paths.  Not a node.
+				vec.push(((x + 1, y), 1));
 			}
-			else
+			if !is_wall(grid[y - 1][x])
 			{
-				// 1 or 3 or 4.
+				vec.push(((x, y - 1), 1));
 			}
+			if !is_wall(grid[y][x - 1])
+			{
+				vec.push(((x - 1, y), 1));
+			}
+			adj.insert((x, y), vec);
 		}
 	}
 
-	ret
-}
-
-fn test_keys(keys: &HashMap<u8, Pos>, doors: &HashMap<u8, Pos>, grid: &mut Vec<Vec<u8>>, pos: Pos) -> usize
-{
-	let adj = build_adjacency(grid);
-	let d = dijkstra(pos, &adj);
-
-	let mut min = std::usize::MAX;
-
-	for k in keys.iter()
+	for from in nodes.iter()
 	{
-		//println!("{}: {:?}", char::from_u32(*k.0 as u32).expect(""), d.get(k.1));
-		match d.get(k.1)
+		let adj = dijkstra(*from.1, &adj);
+		for to in nodes.iter()
 		{
-		None => {},
-		Some(len) =>
-		{
-			// Remove the specified door and key, then recurse.
-			let key = *k.0;
-			let door = key - 0x20;
-			let pos = doors[&door];
-			// println!("{}: {:?}", char::from_u32(door as u32).expect(""), pos);
-			//println!("==");
-			let mut row = grid[pos.1].clone();
-			row[pos.0] = 0x2E;
-			let mut keys = keys.clone();
-			let mut doors = doors.clone();
-			keys.remove(&key);
-			doors.remove(&door);
-			//println!("{:?}", keys);
-			//println!("{:?}", doors);
-			//println!("{:?}", pos.1);
-			
-			grid.push(row);
-			let row = grid.swap_remove(pos.1);
-			
-			let ret = test_keys(&keys, &doors, grid, pos);
-			if ret < std::usize::MAX
+			if from.0 == to.0
 			{
-				let ret = ret + len;
-				if ret < min
-				{
-					//println!("{:?}", min);
-					min = ret;
-				}
-			}
-			
-			// Put the door back.
-			grid[pos.1] = row;
-		}
+				continue;
+			}	
+			println!("From {} ({:?}) to {} ({:?}) = {:?}", from.0, from.1, to.0, to.1, adj.get(to.1));
 		}
 	}
-
-	min
 }
 
 fn main()
@@ -262,19 +200,15 @@ fn main()
 	for (y, row) in INPUT.iter().enumerate()
 	{
 		let mut v2 = Vec::new();
-		//println!("{:?}", row.as_bytes());
 		for (x, ch) in row.as_bytes().iter().enumerate()
 		{
-			if *ch >= 0x61 && *ch <= 0x7A
+			if is_door(*ch)
 			{
-				//println!("({}, {}) = {}", x, y, char::from_u32(*ch as u32).expect(""));
-				// Key.
-				keys.insert(*ch, (x, y));
-			}
-			if *ch >= 0x41 && *ch <= 0x5A
-			{
-				// Door.
 				doors.insert(*ch, (x, y));
+			}
+			else if is_key(*ch)
+			{
+				keys.insert(*ch, (x, y));
 			}
 			if *ch == 0x40
 			{
@@ -286,9 +220,11 @@ fn main()
 		grid.push(v2);
 	}
 
-	let ret = test_keys(&keys, &doors, &mut grid, start);
-	//let adj = build_adjacency(&vec);
-	//println!("{:?}", keys.clone());
-	println!("{:?}", ret);
+	build_all_links(&grid, &keys, &doors);
+
+//	let ret = test_keys(&keys, &doors, &mut grid, start);
+//	//let adj = build_adjacency(&vec);
+//	//println!("{:?}", keys.clone());
+//	println!("{:?}", ret);
 }
 
