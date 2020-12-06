@@ -28,10 +28,26 @@ fn main() -> std::io::Result<()>
 		.collect::<Vec<(i32, i32, String, String)>>();
 	//let prog = prog.split(' ');//.collect::<Vec<i32>>();
 	
+	let mut valid = 0;
 	for p in prog
 	{
-		println!("{:?}", p);
+		//println!("{:?}", p);
+		let mut count = 0;
+		let cmp = p.2.bytes().last().unwrap();
+		for c in p.3.bytes()
+		{
+			if c == cmp
+			{
+				count = count + 1;
+			}
+		}
+		if count >= p.0 && count <= p.1
+		{
+			valid = valid + 1
+		}
+		println!("count = {}, valid = {}", count, count >= p.0 && count <= p.1);
 	}
+	println!("valid = {}", valid);
 	
 //
 //
