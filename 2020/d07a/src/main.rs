@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::collections::LinkedList;
 use std::fs::File;
 use std::io::prelude::*;
@@ -32,6 +33,15 @@ fn get_parents(children: &Nesting, name: &str) -> Contains
 	}
 
 	parents
+}
+
+fn get_ancestors(ancestors: &mut HashSet<String>, parents: &Nesting, name: &str)
+{
+	for (k, _v) in parents.get(name).unwrap()
+	{
+		ancestors.insert(k.to_string());
+		get_ancestors(ancestors, parents, k);
+	}
 }
 
 fn get_children(captures: &Captures) -> Contains
@@ -123,5 +133,11 @@ fn main()
 	}
 
 	println!("{:?}", parents);
+
+	let mut ancestors: HashSet<String> = HashSet::new();
+	get_ancestors(&mut ancestors, &parents, "shiny gold");
+
+	println!("{:?}", ancestors);
+	println!("{:?}", ancestors.len());
 }
 
