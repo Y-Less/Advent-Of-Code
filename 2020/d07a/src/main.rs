@@ -2,23 +2,21 @@ use std::collections::HashMap;
 use std::collections::LinkedList;
 use std::fs::File;
 use std::io::prelude::*;
-use regex::Regex;
+use regex::*;
 
 type Bag = (String, i64);
 type Nesting = HashMap<String, LinkedList<Bag>>;
 
-fn get_child(input: &str) -> Bag
+fn get_child(name: Option<Match>, count: Option<Match>) -> Bag
 {
-	let mut cn = input.split(' ');
-
-	let count = cn.next().unwrap();
-	let name = cn.next().unwrap();
+	let count = count.unwrap().as_str();
+	let name = name.unwrap().as_str();
 	let count = count.parse().expect("Bag amount not a number");
 
 	(name.to_string(), count)
 }
 
-fn get_children(input: &str) -> LinkedList<Bag>
+fn get_children(captures: &Captures) -> LinkedList<Bag>
 {
 	// Guide to (useful) matches:
 	//
@@ -34,9 +32,38 @@ fn get_children(input: &str) -> LinkedList<Bag>
 	//   15 - child 4
 	//
 	let mut children = LinkedList::new();
-
-	input.split(", ")
-		.for_each(|x| children.push_back(get_child(x)));
+	match captures.get(5)
+	{
+		None => {}
+		Some(_x) =>
+		{
+			children.push_back(get_child(captures.get(6), captures.get(5)));
+		}
+	}
+	match captures.get(8)
+	{
+		None => {}
+		Some(_x) =>
+		{
+			children.push_back(get_child(captures.get(9), captures.get(8)));
+		}
+	}
+	match captures.get(11)
+	{
+		None => {}
+		Some(_x) =>
+		{
+			children.push_back(get_child(captures.get(12), captures.get(11)));
+		}
+	}
+	match captures.get(14)
+	{
+		None => {}
+		Some(_x) =>
+		{
+			children.push_back(get_child(captures.get(15), captures.get(14)));
+		}
+	}
 
 	children
 }
@@ -67,33 +94,10 @@ fn main()
 	input.trim().split('\n')
 		.for_each(|x|
 		{
-			//let mut io = x.split(" bags contain ");
-			//for cap in re.captures_iter(x)
-			//{
-			//}
-			let caps = re.captures(x).unwrap();
-			println!("=========================");
-			for cap in caps.iter()
-			{
-				match cap
-				{
-				Some(c) =>
-				{
-					println!("{}", c.as_str());
-				}
-				None =>
-				{
-					println!("---");
-				}
-				}
-			}
-			//println!("{} {} {}", cap.get(1).unwrap().as_str(), cap.get(2).unwrap().as_str(), cap.get(3).unwrap().as_str());
-
-			//let i = io.next().unwrap();
-			//let o = io.next().unwrap();
-            //
-			//let c = get_chemical(o);
-			//children.insert(c.0, (c.1, get_children(i)));
+			let cap = re.captures(x).unwrap();
+			children.insert(cap.get(1).unwrap().as_str().to_string(), get_children(&cap));
 		});
+	
+	println!("{:?}", children);
 }
 
