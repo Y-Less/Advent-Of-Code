@@ -5,7 +5,8 @@ use std::io::prelude::*;
 use regex::*;
 
 type Bag = (String, i64);
-type Nesting = HashMap<String, LinkedList<Bag>>;
+type Contains = LinkedList<Bag>;
+type Nesting = HashMap<String, Contains>;
 
 fn get_child(name: Option<Match>, count: Option<Match>) -> Bag
 {
@@ -16,7 +17,24 @@ fn get_child(name: Option<Match>, count: Option<Match>) -> Bag
 	(name.to_string(), count)
 }
 
-fn get_children(captures: &Captures) -> LinkedList<Bag>
+fn get_parents(children: &Nesting, name: &str) -> Contains
+{
+	let mut parents = LinkedList::new();
+	for (key, value) in children
+	{
+		for (n, c) in value
+		{
+			if n == name
+			{
+				parents.push_back((key.to_string(), *c));
+			}
+		}
+	}
+
+	parents
+}
+
+fn get_children(captures: &Captures) -> Contains
 {
 	// Guide to (useful) matches:
 	//
@@ -71,6 +89,7 @@ fn get_children(captures: &Captures) -> LinkedList<Bag>
 fn main()
 {
 	let mut children: Nesting = HashMap::new();
+	let mut parents: Nesting = HashMap::new();
 	let mut input = String::new();
 	let mut file = File::open("../inputs/d07.txt").expect("Could not read bags file");
 	file.read_to_string(&mut input).expect("Could not read bags file");
@@ -97,7 +116,12 @@ fn main()
 			let cap = re.captures(x).unwrap();
 			children.insert(cap.get(1).unwrap().as_str().to_string(), get_children(&cap));
 		});
-	
-	println!("{:?}", children);
+
+	for (name, _v) in children.iter()
+	{
+		parents.insert(name.to_string(), get_parents(&children, &name));
+	}
+
+	println!("{:?}", parents);
 }
 
