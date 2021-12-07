@@ -16,54 +16,86 @@ fn main() -> std::io::Result<()>
 
 	// Oxygen.
 	let mut oxygen = 0;
-	let mut nu = numbers.to_vec();
-	for i in 0..5
 	{
-		let mut naughts = 0;
-		let mut ones = 0;
-
-		let b = 1 << (4 - i);
-		for n in nu.iter()
+		let mut nu = numbers.to_vec();
+		for i in 0..12
 		{
-			if ((n & b) == 0)
+			let mut naughts = 0;
+			let mut ones = 0;
+
+			let b = 1 << (12 - 1 - i);
+			for n in nu.iter()
 			{
-				naughts = naughts + 1;
+				if ((n & b) == 0)
+				{
+					naughts = naughts + 1;
+				}
+				else
+				{
+					ones = ones + 1;
+				}
+			}
+
+			if (nu.len() == 1)
+			{
+			}
+			else if (ones >= naughts)
+			{
+				nu.retain(|&x| x & b != 0)
 			}
 			else
 			{
-				ones = ones + 1;
+				nu.retain(|&x| x & b == 0)
 			}
 		}
-
-		if (ones >= naughts)
-		{
-			nu.retain(|&x| x & b != 0)
-		}
-		else
-		{
-			nu.retain(|&x| x & b == 0)
-		}
+		println!("{:?}", nu);
+		oxygen = nu[0];
 	}
-	println!("{:?}", nu);
+	
+	// CO2.
+	let mut co2 = 0;
+	{
+		let mut nu = numbers.to_vec();
+		println!("{:?}", nu);
+		for i in 0..12
+		{
+			let mut naughts = 0;
+			let mut ones = 0;
 
-	//let mut gamma = 0;
-	//let mut epsilon = 0;
-	//for i in 0..5
-	//{
-	//	let b = 1 << i;
-	//	if (ones[i] >= naughts[i])
-	//	{
-	//		gamma = gamma | b;
-	//	}
-	//	else
-	//	{
-	//		epsilon = epsilon | b;
-	//	}
-	//}
-    //
-	//println!("{:?}", epsilon);
-	//println!("{:?}", gamma * epsilon);
+			let b = 1 << (12 - 1 - i);
+			for n in nu.iter()
+			{
+				if ((n & b) == 0)
+				{
+					naughts = naughts + 1;
+				}
+				else
+				{
+					ones = ones + 1;
+				}
+			}
 
+			if (nu.len() == 1)
+			{
+			}
+			else if (ones < naughts)
+			{
+				nu.retain(|&x| x & b != 0)
+			}
+			else
+			{
+				nu.retain(|&x| x & b == 0)
+			}
+		}
+		println!("{:?}", nu);
+		co2 = nu[0];
+	}
+	
+	println!("{:?}", oxygen);
+	println!("{:?}", co2);
+	println!("{:?}", oxygen * co2);
+
+	
 	Ok(())
 }
 
