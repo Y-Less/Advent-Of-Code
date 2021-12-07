@@ -9,8 +9,8 @@ fn main() -> std::io::Result<()>
 		file.read_to_string(&mut input)?;
 	}
 
-	let mut naughts: [i32; 5] = [0; 5];
-	let mut ones: [i32; 5] = [0; 5];
+	let mut naughts: [i32; 12] = [0; 12];
+	let mut ones: [i32; 12] = [0; 12];
 	
 	let numbers = input.trim().split('\n')
 		.map(|x| i32::from_str_radix(x, 2).unwrap())
@@ -20,7 +20,7 @@ fn main() -> std::io::Result<()>
 
 	for n in numbers
 	{
-		for i in 0..5
+		for i in 0..12
 		{
 			let b = 1 << i;
 			if ((n & b) == 0)
@@ -36,7 +36,7 @@ fn main() -> std::io::Result<()>
 
 	let mut gamma = 0;
 	let mut epsilon = 0;
-	for i in 0..5
+	for i in 0..12
 	{
 		let b = 1 << i;
 		if (ones[i] > naughts[i])
