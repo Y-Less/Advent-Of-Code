@@ -57,6 +57,7 @@ fn main() -> std::io::Result<()>
 			}
 			None =>
 			{
+				boards.push(board);
 				break;
 			}
 		}
