@@ -10,7 +10,7 @@ fn readNumbers(line: &str) -> Vec<i32>
 	numbers
 }
 
-fn boardComplete(board: [[i32; 5]; 5], numbers: Vec<i32>) -> i32
+fn boardComplete(board: &[[i32; 5]; 5], numbers: &Vec<i32>) -> i32
 {
 	if
 		(numbers.contains(&board[0][0]) && numbers.contains(&board[0][1]) && numbers.contains(&board[0][2]) && numbers.contains(&board[0][3]) && numbers.contains(&board[0][4])) ||
@@ -64,7 +64,7 @@ fn main() -> std::io::Result<()>
 	let mut lines = input.trim().split('\n');
 	
 	let calls = readNumbers(lines.next().unwrap());
-	println!("{:?}", calls);
+	//println!("{:?}", calls);
 	
 	lines.next();
 	let mut board: [[i32; 5]; 5] = [[0; 5]; 5];
@@ -103,7 +103,25 @@ fn main() -> std::io::Result<()>
 			}
 		}
 	}
-	println!("{:?}", boards);
+	
+	for i in 1..calls.len()
+	{
+		let mut part: Vec<i32> = Vec::new();
+		part.resize(i, 0);
+		part.clone_from_slice(&calls[..i]);
+		//println!("{:?}", part);
+		for board in &boards
+		{
+			let sum = boardComplete(board, &part);
+			if (sum != -1)
+			{
+				let call = calls[i - 1];
+				println!("{:?}", board);
+				println!("{:?}", sum * call);
+				return Ok(());
+			}
+		}
+	}
 	
 	Ok(())
 }
