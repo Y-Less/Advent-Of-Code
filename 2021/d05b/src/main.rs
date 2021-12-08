@@ -20,13 +20,13 @@ fn main() -> std::io::Result<()>
 		let parts = sep.split(line).map(|x| x.parse().unwrap()).collect::<Vec<i32>>();
 		if (parts[0] != parts[2] && parts[1] != parts[3])
 		{
-			continue;
-		}
-		//println!("{:?}", line);
-		for i in std::cmp::min(parts[0], parts[2])..std::cmp::max(parts[0], parts[2]) + 1
-		{
-			for j in std::cmp::min(parts[1], parts[3])..std::cmp::max(parts[1], parts[3]) + 1
+			let x = parts[0];
+			let y = parts[1];
+			let z = std::cmp::max(parts[0], parts[2]) - std::cmp::min(parts[0], parts[2]);
+			for n in 0 .. z + 1
 			{
+				let i = x + (if (parts[0] > parts[2]) {-n} else {n});
+				let j = y + (if (parts[1] > parts[3]) {-n} else {n});
 				//println!("{:?} {:?}", i, j);
 				if let Some(v) = vents.get_mut(&i)
 				{
@@ -48,6 +48,37 @@ fn main() -> std::io::Result<()>
 					let mut v = HashMap::new();
 					v.insert(j, 1);
 					vents.insert(i, v);
+				}
+			}
+		}
+		else
+		{
+			for i in std::cmp::min(parts[0], parts[2])..std::cmp::max(parts[0], parts[2]) + 1
+			{
+				for j in std::cmp::min(parts[1], parts[3])..std::cmp::max(parts[1], parts[3]) + 1
+				{
+					//println!("{:?} {:?}", i, j);
+					if let Some(v) = vents.get_mut(&i)
+					{
+						if (v.contains_key(&j))
+						{
+							if (v[&j] == 1)
+							{
+								dangerous = dangerous + 1;
+							}
+							v.insert(j, v[&j] + 1);
+						}
+						else
+						{
+							v.insert(j, 1);
+						}
+					}
+					else
+					{
+						let mut v = HashMap::new();
+						v.insert(j, 1);
+						vents.insert(i, v);
+					}
 				}
 			}
 		}
