@@ -11,7 +11,30 @@ fn main() -> std::io::Result<()>
 		file.read_to_string(&mut input)?;
 	}
 
-	let numbers = input.trim().split('\n')
+	let lines = input.trim().split('\n');
+	let mut highest: i32 = 0;
+	let mut accum: i32 = 0;
+	for line in lines
+	{
+		if line.len() == 0
+		{
+			if accum > highest
+			{
+				highest = accum
+			}
+			accum = 0;
+		}
+		else
+		{
+			let n: i32 = line.parse().unwrap();
+			accum = accum + n;
+		}
+	}
+	if accum > highest
+	{
+		highest = accum
+	}
+	/*let numbers = input.trim().split('\n')
 		.map(|x| x.parse().expect("Not a number"))
 		.collect::<Vec<i32>>();
 
@@ -25,9 +48,9 @@ fn main() -> std::io::Result<()>
 			count = count + 1;
 		}
 		prev = n;
-	}
+	}*/
 
-	println!("{:?}", count);
+	println!("{:?}", highest);
 
 	Ok(())
 }
