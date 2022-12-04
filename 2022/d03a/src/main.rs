@@ -1,6 +1,32 @@
 use std::fs::File;
 use std::io::prelude::*;
 
+//#[warn(non_snake_case, none)]
+
+fn deBruijn(data: u64) -> u64
+{
+	// Couldn't get this to work in rust...
+	/*
+	let scDeBruijn = //: [u64, 64] =
+		[
+			1,  2,  3, 54,  4,  8, 55, 28,  5, 39, 42,  9, 35, 56, 49, 29,
+		   63,  6, 40, 47, 45, 43, 23, 10, 25, 36, 60, 57, 50, 19, 30, 12,
+		   64, 53,  7, 27, 38, 41, 34, 48, 62, 46, 44, 22, 24, 59, 18, 11,
+		   52, 26, 37, 33, 61, 21, 58, 17, 51, 32, 20, 16, 31, 15, 14, 13
+		];
+	scDeBruijn[(((data & (!data + 1)) * 0x022FDD63CC95386D) >> 27) as usize]
+	*/
+	let mut bit = 0;
+	for i in 0 .. 64
+	{
+		if data & (1 << i) != 0
+		{
+			bit = i + 1;
+		}
+	}
+	bit
+}
+
 fn bitmap(s: &str) -> (u64, u64, u64)
 {
 	let mut ret1: u64 = 0;
@@ -58,21 +84,19 @@ fn main() -> std::io::Result<()>
 		file.read_to_string(&mut input)?;
 	}
 
-	/*let lines = input.trim().split('\n');
-	let mut total = 0;
+	let lines = input.trim().split('\n');
 	for line in lines
 	{
-		let original = line.trim().split(' ').collect::<Vec<&str>>();
-		//println!("{:?}", original[0]);
-		total = total + score(original[0], original[1]);
-		println!("{:?}", score(original[0], original[1]));
 	}
-	println!("{:?}", total);*/
 	
-	let s = "Helloe";
+	let s = "HeLloL";
 	println!("{:?}", s.bytes().nth(2));
 	println!("{:?}", s.bytes().nth(3));
-	println!("{:?}", bitmap(s));
+	let b = bitmap(s);
+	println!("{:?}", b.2);
+	println!("{:?}", deBruijn(b.2));
+	
+	
 
 	Ok(())
 }
