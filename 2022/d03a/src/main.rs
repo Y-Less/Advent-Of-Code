@@ -7,7 +7,7 @@ fn deBruijn(data: u64) -> u64
 {
 	// Couldn't get this to work in rust...
 	/*
-	let scDeBruijn = //: [u64, 64] =
+	let scDeBruijn: [u64; 64] =
 		[
 			1,  2,  3, 54,  4,  8, 55, 28,  5, 39, 42,  9, 35, 56, 49, 29,
 		   63,  6, 40, 47, 45, 43, 23, 10, 25, 36, 60, 57, 50, 19, 30, 12,
