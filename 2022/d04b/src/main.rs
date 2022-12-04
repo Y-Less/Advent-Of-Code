@@ -20,14 +20,9 @@ fn main() -> std::io::Result<()>
 		let r = pairs[1].split('-')
 			.map(|x| x.parse().expect("Not a number"))
 			.collect::<Vec<i32>>();
-		if l[0] <= r[0] && l[1] >= r[1]
+		if l[0] <= r[1] && l[1] >= r[0]
 		{
 			//println!("{:?} is fully contained in {:?}", r, l);
-			total = total + 1;
-		}
-		else if r[0] <= l[0] && r[1] >= l[1]
-		{
-			//println!("{:?} is fully contained in {:?}", l, r);
 			total = total + 1;
 		}
 	}
