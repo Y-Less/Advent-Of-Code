@@ -50,7 +50,7 @@ fn main() -> std::io::Result<()>
 		}
 		else if r[0] <= l[0] && r[1] >= l[1]
 		{
-			//println!("{:?} is fully contained in {:?}", r, l);
+			//println!("{:?} is fully contained in {:?}", l, r);
 			total = total + 1;
 		}
 	}
