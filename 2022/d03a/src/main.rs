@@ -44,13 +44,13 @@ fn bitmap(s: &str) -> (u64, u64, u64)
 			//println!("{:?}, {:?}", a, b);
 			if b >= 26
 			{
-				println!("{:?}, {:?}", b, b - 32);
+				//println!("{:?}, {:?}", b, b - 32);
 				//let a = j.unwrap() - 0x61; // - 'a'
 				ret1 = ret1 | (1u64 << b - 32);
 			}
 			else
 			{
-				println!("{:?}, {:?}", b, b + 26);
+				//println!("{:?}, {:?}", b, b + 26);
 				ret1 = ret1 | (1u64 << b + 26);
 			}
 		}
@@ -60,13 +60,13 @@ fn bitmap(s: &str) -> (u64, u64, u64)
 			let b = j.unwrap() - 0x41; // - 'A'
 			if b >= 26
 			{
-				println!("{:?}, {:?}", b, b - 32);
+				//println!("{:?}, {:?}", b, b - 32);
 				//let a = j.unwrap() - 0x61; // - 'a'
 				ret2 = ret2 | (1u64 << b - 32);
 			}
 			else
 			{
-				println!("{:?}, {:?}", b, b + 26);
+				//println!("{:?}, {:?}", b, b + 26);
 				ret2 = ret2 | (1u64 << b + 26);
 			}
 		}
@@ -80,23 +80,20 @@ fn main() -> std::io::Result<()>
 
 	let mut input = String::new();
 	{
-		let mut file = File::open("../inputs/d02.txt")?;
+		let mut file = File::open("../inputs/d03.txt")?;
 		file.read_to_string(&mut input)?;
 	}
 
 	let lines = input.trim().split('\n');
+	let mut total = 0;
 	for line in lines
 	{
+		let b = bitmap(line);
+		total = total + deBruijn(b.2);
+		
 	}
 	
-	let s = "HeLloL";
-	println!("{:?}", s.bytes().nth(2));
-	println!("{:?}", s.bytes().nth(3));
-	let b = bitmap(s);
-	println!("{:?}", b.2);
-	println!("{:?}", deBruijn(b.2));
-	
-	
+	println!("{:?}", total);
 
 	Ok(())
 }
