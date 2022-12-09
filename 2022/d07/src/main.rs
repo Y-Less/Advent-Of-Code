@@ -1,6 +1,41 @@
 use std::fs::File;
 use std::io::prelude::*;
 
+trait Entry
+{
+	fn isDir(&self) -> bool;
+	fn size(&self) -> usize;
+	fn entries(&self) -> Vec<&dyn Entry>;
+}
+
+struct Directory
+{
+	files: Vec<dyn Entry>
+}
+
+struct Filename
+{
+	size: usize
+}
+
+impl Entry for Directory
+{
+	fn isDir(&self) -> bool
+	{
+		true
+	}
+
+	fn size(&self) -> usize
+	{
+		self.files.map(|&e| e.size()).sum()
+	}
+
+	fn entries(&self) -> Vec<&dyn Entry>
+	{
+		self.files
+	}
+}
+
 fn main() -> std::io::Result<()>
 {
 	let mut input = String::new();
@@ -14,74 +49,6 @@ fn main() -> std::io::Result<()>
 	let mut steps: [char; 14];
 	steps = [ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' ];
 	idx = 0;
-	for ch in input.chars()
-	{
-		idx = idx + 1;
-		for i in 0..13
-		{
-			steps[i] = steps[i + 1];
-		}
-		steps[13] = ch;
-		if idx >= 4
-		{
-			let mut diff = true;
-			for i in (14 - 4)..13
-			{
-				for j in i+1..14
-				{
-					if steps[i] == steps[j]
-					{
-						diff = false;
-						break;
-					}
-				}
-				if !diff
-				{
-					break;
-				}
-			}
-			if diff
-			{
-				println!("Part A: {:?}", idx);
-				break;
-			}
-		}
-	}
-	steps = [ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' ];
-	idx = 0;
-	for ch in input.chars()
-	{
-		idx = idx + 1;
-		for i in 0..13
-		{
-			steps[i] = steps[i + 1];
-		}
-		steps[13] = ch;
-		if idx >= 14
-		{
-			let mut diff = true;
-			for i in (14 - 14)..13
-			{
-				for j in i+1..14
-				{
-					if steps[i] == steps[j]
-					{
-						diff = false;
-						break;
-					}
-				}
-				if !diff
-				{
-					break;
-				}
-			}
-			if diff
-			{
-				println!("Part B: {:?}", idx);
-				break;
-			}
-		}
-	}
 
 	Ok(())
 }
