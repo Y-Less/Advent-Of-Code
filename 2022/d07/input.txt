@@ -940,3 +940,4 @@ $ ls
 152895 swjdzqdh.ngv
 215804 tndtmwfv
 68954 wdsjg.thm
+cd ..

@@ -1,15 +1,15 @@
 use std::fs::File;
 use std::io::prelude::*;
 
-struct Entry<'b>
+struct Entry
 {
-	name: &'b str,
+	name: String,
 	isDir: bool,
 	size: usize,
-	entries: Vec<Entry<'b>>,
+	entries: Vec<Entry>,
 }
 
-impl<'b> Entry<'b>
+impl Entry
 {
 	fn getSize(&self) -> usize
 	{
@@ -24,14 +24,16 @@ impl<'b> Entry<'b>
 	}
 }
 
-fn listDir<'a, 'b>(name: &str, mut lines: impl std::iter::Iterator<Item = &'a str>) -> Entry<'b>
+fn listDir<'a>(name: &str, mut lines: impl std::iter::Iterator<Item = &'a str>) -> Entry
 {
 	//let x = lines.next();
 	//println!("{:?}", x);
-	let mut entries: Vec<Entry<'b>> = vec!();
+	let mut entries: Vec<Entry> = vec!();
 	
-	for line in lines
+	//for line in lines
+	loop
 	{
+		let line = lines.next().unwrap();
 		if line == "$ ls"
 		{
 			// Ignore this.
@@ -42,23 +44,27 @@ fn listDir<'a, 'b>(name: &str, mut lines: impl std::iter::Iterator<Item = &'a st
 			println!("back");
 			break;
 		}
-		if line.chars().nth(0) == Some('$')
+		else if line.chars().nth(0) == Some('$')
 		{
 			println!("{:?}", line.get(5..));
+			entries.push(listDir(line.get(5..).unwrap(), lines));
 		}
 		else if line.get(0..4) == Some("dir ")
 		{
 			// Add an entry.
 			println!("dir: {:?}", line.get(4..));
+			//entries.push(listDir(line.get(4..).unwrap(), lines));
 		}
 		else
 		{
 			// Add an entry.
-			println!("{:?}", line);
-			let bits = line.split(' ');
+			let mut bits = line.split(' ');
+			let a = bits.nth(0).unwrap();
+			let b = bits.nth(0).unwrap();
+			println!("file: {:?}, {:?}", b, a);
 			entries.push(Entry {
-				name: bits.nth(1).unwrap(),
-				size: bits.nth(0).unwrap().parse::<usize>().expect("Not a number"),
+				name: b.to_string(),
+				size: a.parse::<usize>().expect("Not a number"),
 				isDir: false,
 				entries: vec!(),
 			});
@@ -66,10 +72,10 @@ fn listDir<'a, 'b>(name: &str, mut lines: impl std::iter::Iterator<Item = &'a st
 	}
 	
 	Entry {
-		name,
+		name: name.to_string(),
 		isDir: true,
 		size: 0,
-		entries: vec!(),
+		entries,
 	}
 }
 
