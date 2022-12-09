@@ -9,23 +9,75 @@ fn main() -> std::io::Result<()>
 		file.read_to_string(&mut input)?;
 	}
 
+	let mut idx: usize;
 	let mut idx = 0;
-	let mut a = ' ';
-	let mut b = ' ';
-	let mut c = ' ';
-	let mut d = ' ';
+	let mut steps: [char; 14];
+	steps = [ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' ];
+	idx = 0;
 	for ch in input.chars()
 	{
 		idx = idx + 1;
-		a = b;
-		b = c;
-		c = d;
-		d = ch;
-		if (idx >= 4)
+		for i in 0..13
 		{
-			if (a != b && a != c && a != d && b != c && b != d && c != d)
+			steps[i] = steps[i + 1];
+		}
+		steps[13] = ch;
+		if idx >= 4
+		{
+			let mut diff = true;
+			for i in (14 - 4)..13
 			{
-				println!("Part A: {:?} {:?} {:?} {:?} {:?}", idx, a, b, c, d);
+				for j in i+1..14
+				{
+					if steps[i] == steps[j]
+					{
+						diff = false;
+						break;
+					}
+				}
+				if !diff
+				{
+					break;
+				}
+			}
+			if diff
+			{
+				println!("Part A: {:?}", idx);
+				break;
+			}
+		}
+	}
+	steps = [ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' ];
+	idx = 0;
+	for ch in input.chars()
+	{
+		idx = idx + 1;
+		for i in 0..13
+		{
+			steps[i] = steps[i + 1];
+		}
+		steps[13] = ch;
+		if idx >= 14
+		{
+			let mut diff = true;
+			for i in (14 - 14)..13
+			{
+				for j in i+1..14
+				{
+					if steps[i] == steps[j]
+					{
+						diff = false;
+						break;
+					}
+				}
+				if !diff
+				{
+					break;
+				}
+			}
+			if diff
+			{
+				println!("Part B: {:?}", idx);
 				break;
 			}
 		}
