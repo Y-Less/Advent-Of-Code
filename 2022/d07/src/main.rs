@@ -1,38 +1,36 @@
 use std::fs::File;
 use std::io::prelude::*;
 
-trait Entry
+struct Entry
 {
-	fn isDir(&self) -> bool;
-	fn size(&self) -> usize;
-	fn entries(&self) -> Vec<&dyn Entry>;
+	isDir: bool,
+	size: usize,
+	entries: Vec<Entry>,
 }
 
-struct Directory
+impl Entry
 {
-	files: Vec<dyn Entry>
-}
-
-struct Filename
-{
-	size: usize
-}
-
-impl Entry for Directory
-{
-	fn isDir(&self) -> bool
+	fn getSize(&self) -> usize
 	{
-		true
+		if self.isDir
+		{
+			self.entries.iter().map(|e| e.getSize()).sum()
+		}
+		else
+		{
+			self.size
+		}
 	}
+}
 
-	fn size(&self) -> usize
-	{
-		self.files.map(|&e| e.size()).sum()
-	}
-
-	fn entries(&self) -> Vec<&dyn Entry>
-	{
-		self.files
+fn listDir<'a>(name: &str, mut lines: impl std::iter::Iterator<Item = &'a str>) -> Entry
+{
+	//let x = lines.next();
+	//println!("{:?}", x);
+	Entry {
+		isDir: false,
+		size: 0,
+		entries: vec!(),
 	}
 }
 
@@ -43,12 +41,15 @@ fn main() -> std::io::Result<()>
 		let mut file = File::open("input.txt")?;
 		file.read_to_string(&mut input)?;
 	}
-
-	let mut idx: usize;
-	let mut idx = 0;
-	let mut steps: [char; 14];
-	steps = [ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' ];
-	idx = 0;
+	
+	let mut lines = input.trim().split('\n');
+	lines.next();
+	//let x = lines.next();
+	//println!("{:?}", x);
+	
+	listDir("/", lines);
+	
+	//let mut stack
 
 	Ok(())
 }
