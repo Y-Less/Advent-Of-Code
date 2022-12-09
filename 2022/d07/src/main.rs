@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::prelude::*;
 
+#[derive(Debug)]
 struct Entry
 {
 	name: String,
@@ -20,6 +21,27 @@ impl Entry
 		else
 		{
 			self.size
+		}
+	}
+
+	fn getSmallDirs(&self) -> usize
+	{
+		if self.isDir
+		{
+			let sub: usize = self.entries.iter().map(|e| e.getSmallDirs()).sum();
+			let cur: usize = self.entries.iter().map(|e| e.getSize()).sum();
+			if cur <= 100000
+			{
+				cur + sub
+			}
+			else
+			{
+				sub
+			}
+		}
+		else
+		{
+			0
 		}
 	}
 }
@@ -96,8 +118,9 @@ fn main() -> std::io::Result<()>
 	let mut idx: usize = 1;
 	
 	let dirs = listDir("/", &lines, &mut idx);
+	println!("dirs: {:?}", dirs);
 	
-	//let mut stack
+	println!("Part A: {:?}", dirs.getSmallDirs());
 
 	Ok(())
 }
