@@ -24,36 +24,41 @@ impl Entry
 	}
 }
 
-fn listDir<'a>(name: &str, mut lines: impl std::iter::Iterator<Item = &'a str>) -> Entry
+fn listDir<'a>(name: &str, lines: &Vec<&str>, idx: &mut usize) -> Entry
 {
 	//let x = lines.next();
-	//println!("{:?}", x);
+	//println!("name: {:?}, idx: {:?}", name, idx);
 	let mut entries: Vec<Entry> = vec!();
 	
 	//for line in lines
 	loop
 	{
-		let line = lines.next().unwrap();
+		let moo = lines.get(*idx);
+		if moo == None
+		{
+			break;
+		}
+		let line = *moo.unwrap();
+		*idx = *idx + 1;
 		if line == "$ ls"
 		{
 			// Ignore this.
-			println!("ls");
+			//println!("ls");
 		}
 		else if line == "$ cd .."
 		{
-			println!("back");
+			//println!("back from {:?}", name);
 			break;
 		}
 		else if line.chars().nth(0) == Some('$')
 		{
-			println!("{:?}", line.get(5..));
-			entries.push(listDir(line.get(5..).unwrap(), lines));
+			//println!("{:?}", line.get(5..));
+			entries.push(listDir(line.get(5..).unwrap(), lines, idx));
 		}
 		else if line.get(0..4) == Some("dir ")
 		{
 			// Add an entry.
-			println!("dir: {:?}", line.get(4..));
-			//entries.push(listDir(line.get(4..).unwrap(), lines));
+			//println!("dir: {:?}", line.get(4..));
 		}
 		else
 		{
@@ -61,7 +66,7 @@ fn listDir<'a>(name: &str, mut lines: impl std::iter::Iterator<Item = &'a str>) 
 			let mut bits = line.split(' ');
 			let a = bits.nth(0).unwrap();
 			let b = bits.nth(0).unwrap();
-			println!("file: {:?}, {:?}", b, a);
+			//println!("file: {:?}, {:?}", b, a);
 			entries.push(Entry {
 				name: b.to_string(),
 				size: a.parse::<usize>().expect("Not a number"),
@@ -87,12 +92,10 @@ fn main() -> std::io::Result<()>
 		file.read_to_string(&mut input)?;
 	}
 	
-	let mut lines = input.trim().split('\n');
-	lines.next();
-	//let x = lines.next();
-	//println!("{:?}", x);
+	let mut lines = input.trim().split('\n').collect::<Vec<&str>>();
+	let mut idx: usize = 1;
 	
-	listDir("/", lines);
+	let dirs = listDir("/", &lines, &mut idx);
 	
 	//let mut stack
 
