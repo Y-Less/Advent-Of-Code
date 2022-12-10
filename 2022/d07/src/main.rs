@@ -12,6 +12,30 @@ struct Entry
 
 impl Entry
 {
+	fn getSmallest(&self, mut smallest: usize, required: usize) -> usize
+	{
+		if self.isDir
+		{
+			for e in self.entries.iter()
+			{
+				smallest = e.getSmallest(smallest, required);
+			}
+			let s2 = self.getSize();
+			if s2 >= required && s2 < smallest
+			{
+				s2
+			}
+			else
+			{
+				smallest
+			}
+		}
+		else
+		{
+			smallest
+		}
+	}
+
 	fn getSize(&self) -> usize
 	{
 		if self.isDir
@@ -121,6 +145,11 @@ fn main() -> std::io::Result<()>
 	println!("dirs: {:?}", dirs);
 	
 	println!("Part A: {:?}", dirs.getSmallDirs());
+	let available = 70000000 - dirs.getSize();
+	let required = 30000000 - available;
+	println!("Size B: {:?} {:?}", available, required);
+	let smallest = dirs.getSmallest(70000000, required);
+	println!("Part B: {:?}", smallest);
 
 	Ok(())
 }
