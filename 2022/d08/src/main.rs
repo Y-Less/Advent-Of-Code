@@ -207,9 +207,9 @@ fn main() -> std::io::Result<()>
 					break;
 				}
 			}
-			for y in i..0
+			for y in 0..i
 			{
-				let cur = input[y - 1][j];
+				let cur = input[i - y - 1][j];
 				if cur < height
 				{
 					b = b + 1;
@@ -233,9 +233,9 @@ fn main() -> std::io::Result<()>
 					break;
 				}
 			}
-			for x in j..0
+			for x in 0..j
 			{
-				let cur = input[i][x - 1];
+				let cur = input[i][j - x - 1];
 				if cur < height
 				{
 					d = d + 1;
