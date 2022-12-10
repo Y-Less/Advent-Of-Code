@@ -108,9 +108,9 @@ fn main() -> std::io::Result<()>
 	let w = input.len();
 	let h = input[0].len();
 	let mut visibility = vec![vec![0; h]; w];
-    
+
 	println!("Debug A: {:?}", input);
-	
+
 	for i in 0..h
 	{
 		let mut highest = -1;
@@ -124,7 +124,7 @@ fn main() -> std::io::Result<()>
 			}
 		}
 	}
-	
+
 	for i in 0..h
 	{
 		let mut highest = -1;
@@ -138,7 +138,7 @@ fn main() -> std::io::Result<()>
 			}
 		}
 	}
-	
+
 	for j in 0..w
 	{
 		let mut highest = -1;
@@ -152,7 +152,7 @@ fn main() -> std::io::Result<()>
 			}
 		}
 	}
-	
+
 	for j in 0..w
 	{
 		let mut highest = -1;
@@ -166,7 +166,7 @@ fn main() -> std::io::Result<()>
 			}
 		}
 	}
-	
+
 	let mut total = 0;
 	for i in 0..h
 	{
@@ -180,9 +180,81 @@ fn main() -> std::io::Result<()>
 			}
 		}
 	}
-	
+
 	println!("Debug A: {:?}", visibility);
 	println!("Part A: {:?}", total);
+
+	let mut highest = -1;
+	for i in 0..h
+	{
+		for j in 0..w
+		{
+			let mut a = 0;
+			let mut b = 0;
+			let mut c = 0;
+			let mut d = 0;
+			let height = input[i][j];
+			for y in i+1..h
+			{
+				let cur = input[y][j];
+				if cur < height
+				{
+					a = a + 1;
+				}
+				else
+				{
+					a = a + 1;
+					break;
+				}
+			}
+			for y in i..0
+			{
+				let cur = input[y - 1][j];
+				if cur < height
+				{
+					b = b + 1;
+				}
+				else
+				{
+					b = b + 1;
+					break;
+				}
+			}
+			for x in j+1..w
+			{
+				let cur = input[i][x];
+				if cur < height
+				{
+					c = c + 1;
+				}
+				else
+				{
+					c = c + 1;
+					break;
+				}
+			}
+			for x in j..0
+			{
+				let cur = input[i][x - 1];
+				if cur < height
+				{
+					d = d + 1;
+				}
+				else
+				{
+					d = d + 1;
+					break;
+				}
+			}
+			let scenic = a * b * c * d;
+			println!("Debug B: {:?} {:?} {:?} {:?} {:?}", a, b, c, d, scenic);
+			if scenic > highest
+			{
+				highest = scenic;
+			}
+		}
+	}
+	println!("Part B: {:?}", highest);
 
 	Ok(())
 }
